@@ -1,0 +1,6 @@
+C:\work\DS_Network\DS_Network\bin\Debug\DS_Network.exe.config
+C:\work\DS_Network\DS_Network\bin\Debug\DS_Network.exe
+C:\work\DS_Network\DS_Network\bin\Debug\DS_Network.pdb
+C:\work\DS_Network\DS_Network\obj\Debug\DS_Network.csprojResolveAssemblyReference.cache
+C:\work\DS_Network\DS_Network\obj\Debug\DS_Network.exe
+C:\work\DS_Network\DS_Network\obj\Debug\DS_Network.pdb
