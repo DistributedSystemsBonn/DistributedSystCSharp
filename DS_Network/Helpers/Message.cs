@@ -23,7 +23,7 @@ namespace DS_Network.Helpers
             }
         }
 
-        public string Message
+        public string Msg
         {
             get
             {

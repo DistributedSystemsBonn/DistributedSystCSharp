@@ -4,3 +4,9 @@ C:\work\DS_Network\DS_Network\bin\Debug\DS_Network.pdb
 C:\work\DS_Network\DS_Network\obj\Debug\DS_Network.csprojResolveAssemblyReference.cache
 C:\work\DS_Network\DS_Network\obj\Debug\DS_Network.exe
 C:\work\DS_Network\DS_Network\obj\Debug\DS_Network.pdb
+Z:\Documents\workspace\WS1516\DistributedSystCSharp\DS_Network\bin\Debug\DS_Network.exe.config
+Z:\Documents\workspace\WS1516\DistributedSystCSharp\DS_Network\obj\Debug\DS_Network.csprojResolveAssemblyReference.cache
+Z:\Documents\workspace\WS1516\DistributedSystCSharp\DS_Network\bin\Debug\DS_Network.exe
+Z:\Documents\workspace\WS1516\DistributedSystCSharp\DS_Network\bin\Debug\DS_Network.pdb
+Z:\Documents\workspace\WS1516\DistributedSystCSharp\DS_Network\obj\Debug\DS_Network.exe
+Z:\Documents\workspace\WS1516\DistributedSystCSharp\DS_Network\obj\Debug\DS_Network.pdb

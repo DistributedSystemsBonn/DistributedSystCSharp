@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DS_Network", "DS_Network\DS_Network.csproj", "{BA7CC2D3-0CE3-4015-9893-D4FB246E1FFB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WcfService", "WcfService\WcfService.csproj", "{EE85AD19-455C-4E2E-BC81-8F74257DF557}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{BA7CC2D3-0CE3-4015-9893-D4FB246E1FFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA7CC2D3-0CE3-4015-9893-D4FB246E1FFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA7CC2D3-0CE3-4015-9893-D4FB246E1FFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE85AD19-455C-4E2E-BC81-8F74257DF557}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE85AD19-455C-4E2E-BC81-8F74257DF557}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE85AD19-455C-4E2E-BC81-8F74257DF557}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE85AD19-455C-4E2E-BC81-8F74257DF557}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

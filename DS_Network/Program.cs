@@ -11,10 +11,12 @@ namespace DS_Network
     {
         static void Main(string[] args)
         {
-
+            //TODO: 
+            ServiceReference1.Service1Client client = new ServiceReference1.Service1Client();
             //TODO: start WCF Service
-            Node newNode = new Node();
+            Node newNode = new Node(client);
 
+            client.Close();
 
         }
     }

@@ -13,7 +13,7 @@ namespace DS_Network.Network
         private IPAddress _address;
 
         //TODO: put WCF service to constructor as parameter and use it in methods (like join...)
-        public Node()
+        public Node(ServiceReference1.Service1Client client)
         {
             IPHostEntry host;
             host = Dns.GetHostEntry(Dns.GetHostName());
@@ -24,7 +24,7 @@ namespace DS_Network.Network
                     _address = ip;
                 }
             }
-
+            
             if (_address == null)
             {
                 throw new Exception("Cannot find proper ip address");
