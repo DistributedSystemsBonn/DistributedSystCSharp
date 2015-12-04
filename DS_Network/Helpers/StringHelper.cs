@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -41,5 +42,16 @@ namespace DS_Network.Helpers
             return command.Length == 2;
         }
 
+        public static IPAddress ConvertIpAddress(string ip)
+        {
+            IPAddress toJoinAddress;
+
+            if (!IPAddress.TryParse(ip, out toJoinAddress))
+            {
+                throw new ArgumentException("Parameter is not IP address");
+            }
+
+            return toJoinAddress;
+        }
     }
 }

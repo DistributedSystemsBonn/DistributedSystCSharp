@@ -6,7 +6,7 @@ using DS_Network.Helpers;
 
 namespace DS_Network.Network
 {
-    public class Node : IConnectionService
+    public class Node
     {
         private Dictionary<int, String> _hostLookup = new Dictionary<int, string>();
         private IPAddress _address;
@@ -42,16 +42,8 @@ namespace DS_Network.Network
                     throw new ArgumentException("Only join command can be with parameter");
                 }
                 var commandParameter = commandArr[1];
-                IPAddress toJoinAddress;
-
-                if (IPAddress.TryParse(commandParameter, out toJoinAddress))
-                {
-                    Join(toJoinAddress.ToString());
-                }
-                else
-                {
-                    throw new ArgumentException("Parameter is not IP address");
-                }
+                IPAddress toJoinAddress = StringHelper.ConvertIpAddress(commandParameter);
+                Join(toJoinAddress.ToString());
             }
             else if (commandArr.Length == 1)
             {
@@ -73,6 +65,8 @@ namespace DS_Network.Network
         public void Join(String address)
         {
             Console.WriteLine("Join operation with address " + address);
+
+
 
             //TODO: join. send message to just one machine. And then it propagates the message
         }

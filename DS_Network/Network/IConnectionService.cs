@@ -7,7 +7,7 @@ namespace DS_Network.Network
     public interface IConnectionService
     {
         [OperationContract]
-        void Join(string ip);
+        void handleJoin(string ip);
 
         [OperationContract]
         void AddNewComputer(string ip);
