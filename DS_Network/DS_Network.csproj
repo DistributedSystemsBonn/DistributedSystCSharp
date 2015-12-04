@@ -32,6 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CookComputing.XmlRpcV2">
+      <HintPath>..\DLLs\CookComputing.XmlRpcV2.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Samples.XmlRpc">
+      <HintPath>..\DLLs\Microsoft.Samples.XmlRpc.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -44,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\Message.cs" />
+    <Compile Include="Network\IConnectionService.cs" />
     <Compile Include="Network\MasterNode.cs" />
     <Compile Include="Network\Node.cs" />
     <Compile Include="Program.cs" />

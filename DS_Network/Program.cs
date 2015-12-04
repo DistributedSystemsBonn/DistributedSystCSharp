@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ServiceModel;
 using DS_Network.Network;
+using Microsoft.Samples.XmlRpc;
 
 namespace DS_Network
 {
@@ -11,12 +8,22 @@ namespace DS_Network
     {
         static void Main(string[] args)
         {
-            //TODO: 
-            ServiceReference1.Service1Client client = new ServiceReference1.Service1Client();
+            ////TODO: 
+            //ServiceReference1.Service1Client client = new ServiceReference1.Service1Client();
             //TODO: start WCF Service
-            Node newNode = new Node(); //client
 
-            client.Close();
+            ChannelFactory<IConnectionService> cf = new ChannelFactory<IConnectionService>(
+                new WSHttpBinding(), "http://www.example.com/xmlrpc");
+
+            cf.Endpoint.Behaviors.Add(new XmlRpcEndpointBehavior());
+
+            var client = cf.CreateChannel();
+
+            Node newNode = new Node(client); //client
+
+
+
+            //client.Close();
 
         }
     }

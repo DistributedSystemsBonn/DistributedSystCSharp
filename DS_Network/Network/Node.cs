@@ -7,13 +7,13 @@ using System.Net;
 
 namespace DS_Network.Network
 {
-    public class Node
+    public class Node : IConnectionService
     {
         private Dictionary<int, String> _hostLookup = new Dictionary<int, string>();
         private IPAddress _address;
 
         //TODO: put WCF service to constructor as parameter and use it in methods (like join...)
-        public Node() //ServiceReference1.Service1Client client
+        public Node(IConnectionService client) //ServiceReference1.Service1Client client
         {
             IPHostEntry host;
             host = Dns.GetHostEntry(Dns.GetHostName());
@@ -33,7 +33,14 @@ namespace DS_Network.Network
 
         public void Join(String address)
         {
+
+
             //TODO: join. send message to just one machine. And then it propagates the message
+        }
+
+        public void AddNewComputer(string ip)
+        {
+            throw new NotImplementedException();
         }
 
         public void SignOff()
