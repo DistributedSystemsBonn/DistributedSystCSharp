@@ -35,9 +35,6 @@
     <Reference Include="CookComputing.XmlRpcV2">
       <HintPath>..\DLLs\CookComputing.XmlRpcV2.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Samples.XmlRpc">
-      <HintPath>..\DLLs\Microsoft.Samples.XmlRpc.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
@@ -50,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\Message.cs" />
+    <Compile Include="Helpers\StringHelper.cs" />
     <Compile Include="Network\IConnectionService.cs" />
     <Compile Include="Network\MasterNode.cs" />
     <Compile Include="Network\Node.cs" />
@@ -79,6 +77,10 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Samples.XmlRpc\Microsoft.Samples.XmlRpc.csproj">
+      <Project>{d556d0b7-a193-4610-8dd3-17b715f2c868}</Project>
+      <Name>Microsoft.Samples.XmlRpc</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WcfService\WcfService.csproj">
       <Project>{ee85ad19-455c-4e2e-bc81-8f74257df557}</Project>
       <Name>WcfService</Name>

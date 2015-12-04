@@ -9,3 +9,4 @@ C:\work\DistributedSystCSharp\WcfService\bin\Debug\WcfService.dll
 C:\work\DistributedSystCSharp\WcfService\bin\Debug\WcfService.pdb
 C:\work\DistributedSystCSharp\WcfService\obj\Debug\WcfService.dll
 C:\work\DistributedSystCSharp\WcfService\obj\Debug\WcfService.pdb
+C:\work\DistributedSystCSharp\WcfService\obj\Debug\WcfService.csprojResolveAssemblyReference.cache

@@ -6,12 +6,8 @@ namespace DS_Network.Network
     {
         private string _storedVariable = String.Empty;
 
-        public MasterNode() : base()
+        public MasterNode(IConnectionService client) : base(client)
         {
-
         }
-
-
-
     }
 }

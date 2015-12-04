@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net;
+using System.Net.Sockets;
+using DS_Network.Helpers;
 
 namespace DS_Network.Network
 {
@@ -19,7 +18,7 @@ namespace DS_Network.Network
             host = Dns.GetHostEntry(Dns.GetHostName());
             foreach (IPAddress ip in host.AddressList)
             {
-                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
                     _address = ip;
                 }
@@ -31,9 +30,49 @@ namespace DS_Network.Network
             }
         }
 
+        public void ProcessCommand(string command)
+        {
+            var commandArr = StringHelper.GetCommandArray(command);
+            var commandName = commandArr[0];
+
+            if (StringHelper.IsWithParameter(commandArr))
+            {
+                if (commandName != "Join")
+                {
+                    throw new ArgumentException("Only join command can be with parameter");
+                }
+                var commandParameter = commandArr[1];
+                IPAddress toJoinAddress;
+
+                if (IPAddress.TryParse(commandParameter, out toJoinAddress))
+                {
+                    Join(toJoinAddress.ToString());
+                }
+                else
+                {
+                    throw new ArgumentException("Parameter is not IP address");
+                }
+            }
+            else if (commandArr.Length == 1)
+            {
+                if (commandName == "Signoff")
+                {
+                    SignOff();
+                }
+                else if (commandName == "Start")
+                {
+                    Start();
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Number of parameters shouldn't be more than 1 or command should be without parameter");
+            }
+        }
+
         public void Join(String address)
         {
-
+            Console.WriteLine("Join operation with address " + address);
 
             //TODO: join. send message to just one machine. And then it propagates the message
         }
