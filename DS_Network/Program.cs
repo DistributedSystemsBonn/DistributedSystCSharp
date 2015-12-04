@@ -14,7 +14,7 @@ namespace DS_Network
             //TODO: 
             ServiceReference1.Service1Client client = new ServiceReference1.Service1Client();
             //TODO: start WCF Service
-            Node newNode = new Node(client);
+            Node newNode = new Node(); //client
 
             client.Close();
 

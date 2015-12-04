@@ -4,3 +4,8 @@ Z:\Documents\workspace\WS1516\DistributedSystCSharp\WcfService\bin\Debug\WcfServ
 Z:\Documents\workspace\WS1516\DistributedSystCSharp\WcfService\obj\Debug\WcfService.csprojResolveAssemblyReference.cache
 Z:\Documents\workspace\WS1516\DistributedSystCSharp\WcfService\obj\Debug\WcfService.dll
 Z:\Documents\workspace\WS1516\DistributedSystCSharp\WcfService\obj\Debug\WcfService.pdb
+C:\work\DistributedSystCSharp\WcfService\bin\Debug\WcfService.dll.config
+C:\work\DistributedSystCSharp\WcfService\bin\Debug\WcfService.dll
+C:\work\DistributedSystCSharp\WcfService\bin\Debug\WcfService.pdb
+C:\work\DistributedSystCSharp\WcfService\obj\Debug\WcfService.dll
+C:\work\DistributedSystCSharp\WcfService\obj\Debug\WcfService.pdb

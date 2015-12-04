@@ -13,7 +13,7 @@ namespace DS_Network.Network
         private IPAddress _address;
 
         //TODO: put WCF service to constructor as parameter and use it in methods (like join...)
-        public Node(ServiceReference1.Service1Client client)
+        public Node() //ServiceReference1.Service1Client client
         {
             IPHostEntry host;
             host = Dns.GetHostEntry(Dns.GetHostName());
