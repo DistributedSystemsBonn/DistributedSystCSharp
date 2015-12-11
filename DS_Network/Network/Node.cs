@@ -43,7 +43,7 @@ namespace DS_Network.Network
 
             if (StringHelper.IsWithParameter(commandArr))
             {
-                if (commandName != "Join")
+                if (commandName != "join")
                 {
                     throw new ArgumentException("Only join command can be with parameter");
                 }
@@ -58,11 +58,11 @@ namespace DS_Network.Network
             }
             else if (commandArr.Length == 1)
             {
-                if (commandName == "Signoff")
+                if (commandName == "signoff")
                 {
                     SignOff();
                 }
-                else if (commandName == "Start")
+                else if (commandName == "start")
                 {
                     Start();
                 }

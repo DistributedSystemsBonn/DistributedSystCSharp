@@ -11,9 +11,11 @@ namespace DS_Network.Helpers
     {
         private static List<String> _commandNames = new List<string>()
         {
-            "Join",
-            "Start",
-            "Signoff"
+            "join",
+            "start",
+            "signoff",
+            "start",
+            "gethosts"
         }; 
 
         public static String[] GetCommandArray(string command)
