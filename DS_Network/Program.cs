@@ -20,8 +20,10 @@ namespace DS_Network
             server.Run();
             //client.Run();
 
+            Console.WriteLine(client.NodeInfo.GetIpAndPort());
             while (true)
             {
+                
                 Console.WriteLine("The service is ready, please write commands: ");
                 var command = Console.ReadLine();
                 try

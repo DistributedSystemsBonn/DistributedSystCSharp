@@ -12,6 +12,14 @@ namespace DS_Network.Network
         private IConnectionProxy _client;
         private NodeInfo _nodeInfo;
 
+        public NodeInfo NodeInfo
+        {
+            get
+            {
+                return _nodeInfo;;
+            }
+        }
+
         //TODO: put WCF service to constructor as parameter and use it in methods (like join...)
         public Node(IConnectionProxy client, int port) //ServiceReference1.Service1Client client
         {
