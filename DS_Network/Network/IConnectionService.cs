@@ -1,19 +1,26 @@
-﻿using System.ServiceModel;
+﻿using System;
+using System.ServiceModel;
+using CookComputing.XmlRpc;
 
 namespace DS_Network.Network
 {
-    // NOTE: You can use the "Rename" command on the "Refactor" menu to change the interface name "IService1" in both code and config file together.
-    [ServiceContract]
+    // NOTE: You can use the "Rename" command on the "Refactor"
+    //menu to change the interface name "IService1" in both code and config file together.
     public interface IConnectionService
     {
-        [OperationContract]
-        void handleJoin(string ip);
+        [XmlRpcMethod("Host.join")]
+        bool join(string ipAndPort);
 
-        [OperationContract]
-        void AddNewComputer(string ip);
+        //void AddNewComputer(string ip);
 
-        void SignOff();
+        [XmlRpcMethod("Host.signoff")]
+        bool signOff();
 
-        // TODO: Add your service operations here
+        [XmlRpcMethod("Host.start")]
+        bool start();
+
+        [XmlRpcMethod("Host.gethosts")]
+        Object[] getHosts();
     }
 }
+

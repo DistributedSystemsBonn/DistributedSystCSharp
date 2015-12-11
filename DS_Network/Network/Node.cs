@@ -8,26 +8,32 @@ namespace DS_Network.Network
 {
     public class Node
     {
-        private Dictionary<int, String> _hostLookup = new Dictionary<int, string>();
-        private IPAddress _address;
+        private Dictionary<String, NodeInfo> _hostLookup = new Dictionary<String, NodeInfo>();
+        private IConnectionProxy _client;
+        private NodeInfo _nodeInfo;
 
         //TODO: put WCF service to constructor as parameter and use it in methods (like join...)
-        public Node(IConnectionService client) //ServiceReference1.Service1Client client
+        public Node(IConnectionProxy client, int port) //ServiceReference1.Service1Client client
         {
             IPHostEntry host;
+            _client = client;
+            IPAddress address = null;
+
             host = Dns.GetHostEntry(Dns.GetHostName());
             foreach (IPAddress ip in host.AddressList)
             {
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    _address = ip;
+                    address = ip;
                 }
             }
             
-            if (_address == null)
+            if (address == null)
             {
                 throw new Exception("Cannot find proper ip address");
             }
+
+            _nodeInfo = new NodeInfo(Guid.NewGuid().ToString(), address.ToString(), port);
         }
 
         public void ProcessCommand(string command)
@@ -42,8 +48,13 @@ namespace DS_Network.Network
                     throw new ArgumentException("Only join command can be with parameter");
                 }
                 var commandParameter = commandArr[1];
-                IPAddress toJoinAddress = StringHelper.ConvertIpAddress(commandParameter);
-                Join(toJoinAddress.ToString());
+
+                String[] obj = commandParameter.Split(':');
+                string ip = obj[0];
+                int port = Convert.ToInt32(obj[1]);
+
+                //IPAddress toJoinAddress = StringHelper.ConvertIpAddress(commandParameter);
+                Join(commandParameter);
             }
             else if (commandArr.Length == 1)
             {
@@ -62,11 +73,19 @@ namespace DS_Network.Network
             }
         }
 
-        public void Join(String address)
+        public void Join(String ipAndPort)
         {
-            Console.WriteLine("Join operation with address " + address);
+            Console.WriteLine("Join operation with address " + ipAndPort);
+            var toJoinInfo = new NodeInfo(ipAndPort);
+            if (toJoinInfo.IsSameHost(_nodeInfo))
+            {
+                throw new ArgumentException("Cannot join yourself");
+            }
 
+            _client.Url = toJoinInfo.GetFullUrl();
+            Object[] listsOfHosts = _client.getHosts();
 
+            Console.WriteLine(listsOfHosts.ToString());
 
             //TODO: join. send message to just one machine. And then it propagates the message
         }

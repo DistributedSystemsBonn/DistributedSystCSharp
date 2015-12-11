@@ -45,13 +45,23 @@ namespace DS_Network.Helpers
         public static IPAddress ConvertIpAddress(string ip)
         {
             IPAddress toJoinAddress;
-
             if (!IPAddress.TryParse(ip, out toJoinAddress))
             {
                 throw new ArgumentException("Parameter is not IP address");
             }
 
             return toJoinAddress;
+        }
+
+        public static int GetPort(string port)
+        {
+            int res = 0;
+            if (!Int32.TryParse(port, out res))
+            {
+                throw new ArgumentException("Parameter is not int in port");
+            }
+
+            return res;
         }
     }
 }
