@@ -37,7 +37,7 @@ namespace DS_Network.Network
 
         public Object[] getHosts()
         {
-            return new Object[]
+            return new String[]
             {
                 "111", "222"
             };
