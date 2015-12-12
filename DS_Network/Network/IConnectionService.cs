@@ -20,7 +20,8 @@ namespace DS_Network.Network
         bool start();
 
         [XmlRpcMethod("Host.gethosts")]
-        Object[] getHosts();
+        //Object[] getHosts();
+        bool getHosts();
     }
 }
 

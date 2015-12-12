@@ -91,7 +91,7 @@ namespace DS_Network.Network
             }
 
             _client.Url = toJoinInfo.GetFullUrl();
-            Object[] listsOfHosts = _client.getHosts();
+            var listsOfHosts = _client.getHosts();
 
             Console.WriteLine(listsOfHosts.ToString());
 

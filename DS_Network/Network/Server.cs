@@ -15,6 +15,11 @@ namespace DS_Network.Network
     {
         private int _port;
 
+        public Server()
+        {
+            
+        }
+
         public Server(int port)
         {
             _port = port;
@@ -22,7 +27,7 @@ namespace DS_Network.Network
 
         public bool join(string ipAndPort)
         {
-            throw new NotImplementedException();
+            return true;
         }
 
         public bool signOff()
@@ -35,12 +40,10 @@ namespace DS_Network.Network
             throw new NotImplementedException();
         }
 
-        public Object[] getHosts()
+        //public Object[] getHosts()
+        public bool getHosts()
         {
-            return new String[]
-            {
-                "111", "222"
-            };
+            return true;
         }
 
         public void Run()
