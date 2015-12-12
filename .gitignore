@@ -184,3 +184,5 @@ FakesAssemblies/
 
 #Test projects
 Test*/
+bin/
+obj/
