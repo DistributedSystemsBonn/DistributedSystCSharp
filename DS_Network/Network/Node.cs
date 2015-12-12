@@ -141,13 +141,16 @@ namespace DS_Network.Network
         /// </summary>
         public void SignOff()
         {
+            var myIp = _nodeInfo.GetIpAndPort();
+
             foreach (var host in _hostLookup.Values)
             {
                 _client.Url = host.GetFullUrl();
-                var ipAndPort = host.GetIpAndPort();
                 //call rpc method to sign off
-                _client.signOff(ipAndPort);
+                _client.signOff(myIp);
             }
+
+            _hostLookup.Clear();
         }
 
         public void Start()
