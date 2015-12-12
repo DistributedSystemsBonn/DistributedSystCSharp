@@ -14,15 +14,17 @@ namespace DS_Network.Network
     public class Server : MarshalByRefObject, IConnectionService
     {
         private int _port;
+        private static Node _client;
 
         public Server()
         {
             
         }
 
-        public Server(int port)
+        public Server(int port, Node client)
         {
             _port = port;
+            _client = client;
         }
 
         public bool join(string ipAndPort)
@@ -40,10 +42,21 @@ namespace DS_Network.Network
             throw new NotImplementedException();
         }
 
+
         //public Object[] getHosts()
-        public Object[] getHosts()
+        public Object[] getHosts(String ipAndPortCallee)
         {
-            return new String[] {"111", "222"};
+            var hostList = _client.HostLookup;
+            var listToSend = new ArrayList();
+
+            foreach (var host in hostList.Values)
+            {
+                listToSend.Add(host.GetIpAndPort());
+            }
+
+            _client.AddNewComputer(ipAndPortCallee);
+
+            return listToSend.ToArray();
         }
 
         public void Run()

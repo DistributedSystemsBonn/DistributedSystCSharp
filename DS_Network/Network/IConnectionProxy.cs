@@ -3,20 +3,20 @@ using CookComputing.XmlRpc;
 
 namespace DS_Network.Network
 {
-    public interface IConnectionProxy : IXmlRpcProxy
+    public interface IConnectionProxy : IXmlRpcProxy, IConnectionService
     {
-        [XmlRpcMethod("Host.join")]
-        bool join(string ipAndPort);
+        //[XmlRpcMethod("Host.join")]
+        //bool join(string ipAndPort);
 
-        //void AddNewComputer(string ip);
+        ////void AddNewComputer(string ip);
 
-        [XmlRpcMethod("Host.signOff")]
-        bool signOff();
+        //[XmlRpcMethod("Host.signOff")]
+        //bool signOff();
 
-        [XmlRpcMethod("Host.start")]
-        bool start();
+        //[XmlRpcMethod("Host.start")]
+        //bool start();
 
-        [XmlRpcMethod("Host.getHosts")]
-        Object[] getHosts();
+        //[XmlRpcMethod("Host.getHosts")]
+        //Object[] getHosts(String ipAndPortCallee);
     }
 }

@@ -14,6 +14,14 @@ namespace DS_Network.Network
         private IConnectionProxy _client;
         private NodeInfo _nodeInfo;
 
+        public Dictionary<String, NodeInfo> HostLookup
+        {
+            get
+            {
+                return _hostLookup;
+            }
+        }
+
         public NodeInfo NodeInfo
         {
             get
@@ -81,17 +89,25 @@ namespace DS_Network.Network
             }
 
             _client.Url = toJoinInfo.GetFullUrl();
-            
-            var listsOfHosts = _client.getHosts();
+
+            //Receive list from receiver
+            var listsOfHosts = _client.getHosts(_nodeInfo.GetIpAndPort());
+
+            //Add list to dictionary
+            foreach (var host in listsOfHosts)
+            {
+                AddNewComputer(host.ToString());
+            }
+
+            //Add ipAndPort of receiver
+            AddNewComputer(ipAndPort);
 
             Console.WriteLine(listsOfHosts.ToString());
-
-            //TODO: join. send message to just one machine. And then it propagates the message
         }
 
-        public void AddNewComputer(string ip)
+        public void AddNewComputer(string ipAndPort)
         {
-            throw new NotImplementedException();
+            _hostLookup.Add(ipAndPort, new NodeInfo(ipAndPort));
         }
 
         public void SignOff()

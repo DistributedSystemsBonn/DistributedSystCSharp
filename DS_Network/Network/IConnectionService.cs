@@ -17,7 +17,7 @@ namespace DS_Network.Network
         bool start();
 
         [XmlRpcMethod("Host.getHosts")]
-        Object[] getHosts();
+        Object[] getHosts(String ipAndPortCallee);
     }
 }
 

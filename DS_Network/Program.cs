@@ -16,7 +16,7 @@ namespace DS_Network
             int port = NetworkHelper.FindFreePort();
 
             Node client = new Node(proxy, port); //client
-            Server server = new Server(port);
+            Server server = new Server(port, client);
             server.Run();
             //client.Run();
 
