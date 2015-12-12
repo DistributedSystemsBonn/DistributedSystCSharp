@@ -4,7 +4,7 @@ namespace DS_Network.Network
 {
     public class NodeInfo
     {
-        private string _id = String.Empty;
+        private long _id = 0;
         private string _ip;
         private int _port;
 
@@ -13,48 +13,54 @@ namespace DS_Network.Network
             get { return _port; }
         }
 
-        public Guid? Id
+        public long Id
         {
             get
             {
-                if (_id == String.Empty)
-                {
-                    return null;
-                }
-
-                return new Guid(_id);
+                return _id;
             }
-            set { _ip = value.ToString(); }
         }
+
+        //public Guid? Id
+        //{
+        //    get
+        //    {
+        //        if (_id == String.Empty)
+        //        {
+        //            return null;
+        //        }
+
+        //        return new Guid(_id);
+        //    }
+        //    set { _ip = value.ToString(); }
+        //}
 
         public string GetIpAndPort()
         {
             return _ip + ":" + _port;
         }
 
-        public int GetGuidCode()
-        {
-            Guid id = Guid.Empty;
-            if (Id != null)
-            {
-                id = (Guid) Id;
-            }
-            else
-            {
-                throw new ArgumentException("Guid cannot be null when getting code");
-            }
+        //public int GetGuidCode()
+        //{
+        //    Guid id = Guid.Empty;
+        //    if (Id != null)
+        //    {
+        //        id = (Guid) Id;
+        //    }
+        //    else
+        //    {
+        //        throw new ArgumentException("Guid cannot be null when getting code");
+        //    }
 
-            var chars = id.ToByteArray();
-            return BitConverter.ToInt32(chars, 0);
-        }
+        //    var chars = id.ToByteArray();
+        //    return BitConverter.ToInt32(chars, 0);
+        //}
 
         public int Compare(NodeInfo host2)
         {
-            int myGuidCode = GetGuidCode();
-            int host2GuidCode = host2.GetGuidCode();
-            if (myGuidCode < host2GuidCode)
+            if (_id < host2.Id)
                 return -1;
-            if (myGuidCode == host2GuidCode)
+            if (_id == host2.Id)
                 return 0;
             return 1;
         }
@@ -74,11 +80,20 @@ namespace DS_Network.Network
             return ToString() + "xmlrpc";
         }
 
-        public NodeInfo(string id, string ip, int port)
+        public void InitId(string ip)
         {
-            _id = id;
+            String[] parts = ip.Split('.', ':');
+            String id = "";
+            for (int i = 0; i < parts.Length; i++)
+                id += parts[i];
+            _id = Convert.ToInt64(id);
+        }
+
+        public NodeInfo(string ip, int port)
+        {
             _ip = ip;
             _port = port;
+            InitId(ip);
         }
 
         public NodeInfo(string ipAndPort)
@@ -86,6 +101,7 @@ namespace DS_Network.Network
             String[] obj = ipAndPort.Split(':');
             _ip = obj[0];
             _port = Convert.ToInt32(obj[1]);
+            InitId(_ip);
         }
     }
 }

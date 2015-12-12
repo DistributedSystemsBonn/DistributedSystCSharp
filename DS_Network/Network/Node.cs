@@ -36,7 +36,7 @@ namespace DS_Network.Network
             _client = client;
             var ipAddress = NetworkHelper.FindIp().ToString();
             
-            _nodeInfo = new NodeInfo(Guid.NewGuid().ToString(), ipAddress, port);
+            _nodeInfo = new NodeInfo(ipAddress, port);
         }
 
         public void ProcessCommand(string command)
