@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using DS_Network.Helpers;
 
@@ -23,26 +25,14 @@ namespace DS_Network.Network
         //TODO: put WCF service to constructor as parameter and use it in methods (like join...)
         public Node(IConnectionProxy client, int port) //ServiceReference1.Service1Client client
         {
-            IPHostEntry host;
-            _client = client;
-            IPAddress address = null;
-
-            host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (IPAddress ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    address = ip;
-                }
-            }
             
-            if (address == null)
-            {
-                throw new Exception("Cannot find proper ip address");
-            }
-
-            _nodeInfo = new NodeInfo(Guid.NewGuid().ToString(), address.ToString(), port);
+            _client = client;
+            var ipAddress = NetworkHelper.FindIp().ToString();
+            
+            _nodeInfo = new NodeInfo(Guid.NewGuid().ToString(), ipAddress, port);
         }
+
+
 
         public void ProcessCommand(string command)
         {
@@ -91,6 +81,7 @@ namespace DS_Network.Network
             }
 
             _client.Url = toJoinInfo.GetFullUrl();
+            
             var listsOfHosts = _client.getHosts();
 
             Console.WriteLine(listsOfHosts.ToString());

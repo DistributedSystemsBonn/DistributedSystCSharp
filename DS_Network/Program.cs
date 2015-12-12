@@ -30,11 +30,10 @@ namespace DS_Network
                 {
                     client.ProcessCommand(command);
                 }
-                catch (ArgumentException exception)
+                catch (Exception exception)
                 {
                     Console.WriteLine(exception.Message);
                 }
-                
             }
             
 

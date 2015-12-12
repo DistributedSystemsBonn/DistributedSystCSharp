@@ -1,4 +1,5 @@
-﻿using CookComputing.XmlRpc;
+﻿using System;
+using CookComputing.XmlRpc;
 
 namespace DS_Network.Network
 {
@@ -9,14 +10,13 @@ namespace DS_Network.Network
 
         //void AddNewComputer(string ip);
 
-        [XmlRpcMethod("Host.signoff")]
+        [XmlRpcMethod("Host.signOff")]
         bool signOff();
 
         [XmlRpcMethod("Host.start")]
         bool start();
 
-        [XmlRpcMethod("Host.gethosts")]
-        //Object[] getHosts();
-        bool getHosts();
+        [XmlRpcMethod("Host.getHosts")]
+        Object[] getHosts();
     }
 }
