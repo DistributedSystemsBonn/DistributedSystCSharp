@@ -41,9 +41,9 @@ namespace DS_Network.Network
         }
 
         //public Object[] getHosts()
-        public bool getHosts()
+        public Object[] getHosts()
         {
-            return true;
+            return new String[] {"111", "222"};
         }
 
         public void Run()
