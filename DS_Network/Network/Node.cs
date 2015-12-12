@@ -72,10 +72,28 @@ namespace DS_Network.Network
                 {
                     Start();
                 }
+                else if (commandName == "gethosts")
+                {
+                    
+                }
             }
             else
             {
                 throw new ArgumentException("Number of parameters shouldn't be more than 1 or command should be without parameter");
+            }
+        }
+
+        public void PrintHosts()
+        {
+            if (_hostLookup.Count == 0)
+            {
+                Console.WriteLine("List of host is empty, host is not in network");
+                return;
+            }
+
+            foreach (var host in _hostLookup.Values)
+            {
+                Console.WriteLine(host.GetFullUrl());
             }
         }
 
