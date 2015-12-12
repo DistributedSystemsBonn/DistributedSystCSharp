@@ -82,8 +82,8 @@ namespace DS_Network.Network
 
         public void InitId(string ip)
         {
-            String[] parts = ip.Split('.', ':');
-            String id = "";
+            var parts = ip.Split('.', ':');
+            var id = String.Empty;
             for (int i = 0; i < parts.Length; i++)
                 id += parts[i];
             _id = Convert.ToInt64(id);
