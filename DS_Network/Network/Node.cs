@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using DS_Network.Helpers;
 
 namespace DS_Network.Network
 {
+    /// <summary>
+    /// Client host
+    /// </summary>
     public class Node
     {
         private Dictionary<String, NodeInfo> _hostLookup = new Dictionary<String, NodeInfo>();
@@ -39,8 +38,6 @@ namespace DS_Network.Network
             
             _nodeInfo = new NodeInfo(Guid.NewGuid().ToString(), ipAddress, port);
         }
-
-
 
         public void ProcessCommand(string command)
         {
@@ -74,7 +71,7 @@ namespace DS_Network.Network
                 }
                 else if (commandName == "gethosts")
                 {
-                    
+                    PrintHosts();
                 }
             }
             else
@@ -114,23 +111,43 @@ namespace DS_Network.Network
             //Add list to dictionary
             foreach (var host in listsOfHosts)
             {
-                AddNewComputer(host.ToString());
+                var toSendHost = AddNewHost(host.ToString());
+                _client.Url = toSendHost.GetFullUrl();
+                _client.addNewHost(_nodeInfo.GetIpAndPort());
             }
 
             //Add ipAndPort of receiver
-            AddNewComputer(ipAndPort);
+            AddNewHost(ipAndPort);
 
             Console.WriteLine(listsOfHosts.ToString());
         }
 
-        public void AddNewComputer(string ipAndPort)
+        /// <summary>
+        /// Add new host to dictionary
+        /// </summary>
+        /// <param name="ipAndPort"></param>
+        /// <returns></returns>
+        public NodeInfo AddNewHost(string ipAndPort)
         {
+            var nodeInfo = new NodeInfo(ipAndPort);
             _hostLookup.Add(ipAndPort, new NodeInfo(ipAndPort));
+
+            return nodeInfo;
         }
 
+        /// <summary>
+        /// Sign off from network
+        /// Sends to all hosts message to remove from their dict
+        /// </summary>
         public void SignOff()
         {
-            //TODO: signoff message (we need to ask, is this a broadcast message or one-node message)???
+            foreach (var host in _hostLookup.Values)
+            {
+                _client.Url = host.GetFullUrl();
+                var ipAndPort = host.GetIpAndPort();
+                //call rpc method to sign off
+                _client.signOff(ipAndPort);
+            }
         }
 
         public void Start()

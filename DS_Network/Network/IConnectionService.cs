@@ -11,13 +11,16 @@ namespace DS_Network.Network
         //void AddNewComputer(string ip);
 
         [XmlRpcMethod("Host.signOff")]
-        bool signOff();
+        bool signOff(String ipAndPort);
 
         [XmlRpcMethod("Host.start")]
         bool start();
 
         [XmlRpcMethod("Host.getHosts")]
         Object[] getHosts(String ipAndPortCallee);
+
+        [XmlRpcMethod("Host.addNewHost")]
+        void addNewHost(String ipAndPort);
     }
 }
 

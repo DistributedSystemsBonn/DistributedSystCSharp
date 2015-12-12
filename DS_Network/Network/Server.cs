@@ -32,18 +32,31 @@ namespace DS_Network.Network
             return true;
         }
 
-        public bool signOff()
+        /// <summary>
+        /// Sign off from network.
+        /// </summary>
+        /// <returns></returns>
+        public bool signOff(string ipAndPort)
         {
-            throw new NotImplementedException();
+            var hostList = _client.HostLookup;
+
+            return hostList.Remove(ipAndPort);
         }
 
+        /// <summary>
+        /// Start algorithm
+        /// </summary>
+        /// <returns></returns>
         public bool start()
         {
             throw new NotImplementedException();
         }
 
-
-        //public Object[] getHosts()
+        /// <summary>
+        /// Get list of hosts
+        /// </summary>
+        /// <param name="ipAndPortCallee"></param>
+        /// <returns></returns>
         public Object[] getHosts(String ipAndPortCallee)
         {
             var hostList = _client.HostLookup;
@@ -54,11 +67,23 @@ namespace DS_Network.Network
                 listToSend.Add(host.GetIpAndPort());
             }
 
-            _client.AddNewComputer(ipAndPortCallee);
+            _client.AddNewHost(ipAndPortCallee);
 
             return listToSend.ToArray();
         }
 
+        /// <summary>
+        /// Add new host to client (when join operation)
+        /// </summary>
+        /// <param name="ipAndPort"></param>
+        public void addNewHost(string ipAndPort)
+        {
+            _client.AddNewHost(ipAndPort);
+        }
+
+        /// <summary>
+        /// Run server
+        /// </summary>
         public void Run()
         {
             IDictionary props = new Hashtable();
