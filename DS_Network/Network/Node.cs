@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using DS_Network.Helpers;
 using System.Threading;
 
@@ -11,11 +13,16 @@ namespace DS_Network.Network
     public class Node
     {
         private Dictionary<String, NodeInfo> _hostLookup = new Dictionary<String, NodeInfo>();
+        private HashSet<string> _appendedStringSet = new HashSet<string>(); 
         private IConnectionProxy _client;
         private NodeInfo _nodeInfo;
-
+        private static DateTime _startTime;
+        private string _resource = String.Empty;
         private static Bully _bully = new Bully();
         private NodeInfo _masterNode;
+        private static TimeSpan _maxDuration = new TimeSpan(0, 0, 20);
+
+        public string Resource { get; set; }
 
         public Dictionary<String, NodeInfo> HostLookup
         {
@@ -29,7 +36,7 @@ namespace DS_Network.Network
         {
             get
             {
-                return _nodeInfo; ;
+                return _nodeInfo;
             }
         }
 
@@ -80,7 +87,7 @@ namespace DS_Network.Network
                 else if (commandName == "election")
                 {
                     ElectMasterNode();
-            }
+                }
             }
             else
             {
@@ -192,7 +199,6 @@ namespace DS_Network.Network
             //NOTE: read and write operations should be syncronized
 
             ElectMasterNode();
-
         }
 
         /// <summary>
@@ -226,6 +232,75 @@ namespace DS_Network.Network
             Console.WriteLine("Master is elected: " + _masterNode.GetIpAndPort());
 
             _bully.finishElection();
+
+            //START ALGORITHM. Because we know our master node. 
+            StartAlgorithm();
+        }
+
+        private string GetRandomFruit()
+        {
+            Random rnd = new Random();
+
+            string[] fruits = { "apple", "mango", "papaya", "banana", "guava", "pineapple" };
+            return fruits[rnd.Next(0, fruits.Length)];
+        }
+
+        public void StartAlgorithm()
+        {
+            var rnd = new Random();
+            int count = 0;
+
+            if (IsMasterNode())
+            {
+                return;
+            }
+
+            do
+            {
+                count++;
+                Console.WriteLine("Start iteration #" + count);
+
+                //wait random amount of time
+                var sleepTime = rnd.Next(2000, 5001); //generate a random waiting time between 2s and 4s
+                Console.WriteLine("Start waiting for " + sleepTime / 1000 + " sec");
+                Thread.Sleep(sleepTime);
+                Console.WriteLine("Finished waiting for " + sleepTime / 1000 + " sec");
+                //initialize client to communicate with master node
+                _client.Url = _masterNode.GetFullUrl();
+
+                //read resource
+                Console.WriteLine("Reading resource from mn " + _masterNode.GetIpAndPort());
+                var readResFromMn = _client.readResource(_nodeInfo.GetIpAndPort());
+
+                //generate string
+                var randomStr = GetRandomFruit();
+                Console.WriteLine("Generated string: " + randomStr);
+
+                //append string
+                var appendedString = String.Concat(readResFromMn, randomStr);
+                //add appended string to list
+                _appendedStringSet.Add(appendedString);
+                Console.WriteLine("Result of appended string " + appendedString);
+
+                //write updated string to the master node
+                _client.updateResource(appendedString, _nodeInfo.GetIpAndPort());
+                Console.WriteLine("Updated string on mn " + _masterNode.GetIpAndPort());
+
+                var executeTime = DateTime.Now;
+                if (TimeSpan.Compare(executeTime - _startTime, _maxDuration) >= 0)
+                {
+                    Console.WriteLine("Exited loop with " + (executeTime - _startTime));
+                    break;
+                }
+            } while (true);
+
+            var finalString = _client.readResource(_nodeInfo.GetIpAndPort());
+            Console.WriteLine("Final string: " + finalString);
+        }
+
+        public bool IsMasterNode()
+        {
+            return _nodeInfo.IsSameHost(_masterNode);
         }
     }
 }

@@ -15,10 +15,9 @@ namespace DS_Network
             var proxy = XmlRpcProxyGen.Create<IConnectionProxy>();
             int port = NetworkHelper.FindFreePort();
 
-            Node client = new Node(proxy, port); //client
-            Server server = new Server(port, client);
+            var client = new Node(proxy, port); //client
+            var server = new Server(port, client);
             server.Run();
-            //client.Run();
 
             Console.WriteLine("Client IP: " + client.NodeInfo.GetIpAndPort());
             Console.WriteLine("Client ID: " + client.NodeInfo.Id);
@@ -37,10 +36,6 @@ namespace DS_Network
                     Console.WriteLine(exception.Message);
                 }
             }
-            
-
-            //client.Close();
-
         }
     }
 }

@@ -27,6 +27,12 @@ namespace DS_Network.Network
 
         [XmlRpcMethod("Host.setMasterNode")]
         void SetMasterNode(string ipAndPort);
+
+        [XmlRpcMethod("Host.readResource")]
+        string readResource(string ipAndPort);
+
+        [XmlRpcMethod("Host.updateResource")]
+        void updateResource(string updateStr, string ipAndPort);
     }
 }
 
