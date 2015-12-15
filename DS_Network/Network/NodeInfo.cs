@@ -80,12 +80,13 @@ namespace DS_Network.Network
             return ToString() + "xmlrpc";
         }
 
-        public void InitId(string ip)
+        public void InitId(string ip, int port)
         {
             var parts = ip.Split('.', ':');
             var id = String.Empty;
             for (int i = 0; i < parts.Length; i++)
                 id += parts[i];
+            id += port.ToString();
             _id = Convert.ToInt64(id);
         }
 
@@ -93,7 +94,7 @@ namespace DS_Network.Network
         {
             _ip = ip;
             _port = port;
-            InitId(ip);
+            InitId(ip, port);
         }
 
         public NodeInfo(string ipAndPort)
@@ -101,7 +102,7 @@ namespace DS_Network.Network
             String[] obj = ipAndPort.Split(':');
             _ip = obj[0];
             _port = Convert.ToInt32(obj[1]);
-            InitId(_ip);
+            InitId(_ip, _port);
         }
     }
 }
