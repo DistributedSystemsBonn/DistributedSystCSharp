@@ -78,6 +78,7 @@ namespace DS_Network.Network
         public string GetFullUrl()
         {
             return ToString() + "xmlrpc";
+            //return ToString();
         }
 
         public void InitId(string ip)

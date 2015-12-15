@@ -167,7 +167,22 @@ namespace DS_Network.Network
             //7. And writes this final string on screen
 
             //NOTE: read and write operations should be syncronized
+
+            Elect();
+
         }
 
+        public void Elect()
+        {
+            if (_hostLookup.Count == 0)
+            {
+                throw new ArgumentException("Computer is not in network");
+            }
+
+            foreach (var node in _hostLookup)
+            {
+                _client.start();
+            }
+        }
     }
 }

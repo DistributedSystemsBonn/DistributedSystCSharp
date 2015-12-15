@@ -14,9 +14,10 @@ namespace DS_Network.Network
         bool signOff(String ipAndPort);
 
         [XmlRpcMethod("Host.start")]
-        bool start();
+        bool start(int id);
 
         [XmlRpcMethod("Host.getHosts")]
+        //[XmlRpcMethod("getHosts")]
         Object[] getHosts(String ipAndPortCallee);
 
         [XmlRpcMethod("Host.addNewHost")]

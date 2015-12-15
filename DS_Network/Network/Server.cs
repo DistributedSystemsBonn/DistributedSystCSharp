@@ -99,6 +99,7 @@ namespace DS_Network.Network
             RemotingConfiguration.RegisterWellKnownServiceType(
               typeof(Server),
               "xmlrpc",
+              //"/",
               WellKnownObjectMode.Singleton);
         }
     }
