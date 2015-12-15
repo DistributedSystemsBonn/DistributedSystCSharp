@@ -20,7 +20,7 @@ namespace DS_Network.Network
                 return _id;
             }
         }
-
+        
         //public Guid? Id
         //{
         //    get

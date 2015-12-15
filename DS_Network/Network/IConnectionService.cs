@@ -21,6 +21,12 @@ namespace DS_Network.Network
 
         [XmlRpcMethod("Host.addNewHost")]
         void addNewHost(String ipAndPort);
+
+        [XmlRpcMethod("Host.receiveElectionMsg")]
+        bool ReceiveElectionMsg(string id);
+
+        [XmlRpcMethod("Host.setMasterNode")]
+        void SetMasterNode(string ipAndPort);
     }
 }
 

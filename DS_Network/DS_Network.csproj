@@ -50,6 +50,7 @@
     <Compile Include="Helpers\Message.cs" />
     <Compile Include="Helpers\NetworkHelper.cs" />
     <Compile Include="Helpers\StringHelper.cs" />
+    <Compile Include="Network\Bully.cs" />
     <Compile Include="Network\IConnectionProxy.cs" />
     <Compile Include="Network\IConnectionService.cs" />
     <Compile Include="Network\IServer.cs" />
