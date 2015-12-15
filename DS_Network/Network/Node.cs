@@ -14,7 +14,7 @@ namespace DS_Network.Network
     {
         private Dictionary<String, NodeInfo> _hostLookup = new Dictionary<String, NodeInfo>();
         private HashSet<string> _appendedStringSet = new HashSet<string>(); 
-        private IConnectionProxy _client;
+        private IConnectionProxy _proxy;
         private NodeInfo _nodeInfo;
         private static DateTime _startTime;
         private string _resource = String.Empty;
@@ -40,11 +40,9 @@ namespace DS_Network.Network
             }
         }
 
-        //TODO: put WCF service to constructor as parameter and use it in methods (like join...)
         public Node(IConnectionProxy client, int port) //ServiceReference1.Service1Client client
         {
-            
-            _client = client;
+            _proxy = client;
             var ipAddress = NetworkHelper.FindIp().ToString();
             
             _nodeInfo = new NodeInfo(ipAddress, port);
@@ -118,17 +116,17 @@ namespace DS_Network.Network
                 throw new ArgumentException("Cannot join yourself");
             }
 
-            _client.Url = toJoinInfo.GetFullUrl();
+            _proxy.Url = toJoinInfo.GetFullUrl();
 
             //Receive list from receiver
-            var listsOfHosts = _client.getHosts(_nodeInfo.GetIpAndPort());
+            var listsOfHosts = _proxy.getHosts(_nodeInfo.GetIpAndPort());
 
             //Add list to dictionary
             foreach (var host in listsOfHosts)
             {
                 var toSendHost = AddNewHost(host.ToString());
-                _client.Url = toSendHost.GetFullUrl();
-                _client.addNewHost(_nodeInfo.GetIpAndPort());
+                _proxy.Url = toSendHost.GetFullUrl();
+                _proxy.addNewHost(_nodeInfo.GetIpAndPort());
             }
 
             //Add ipAndPort of receiver
@@ -160,9 +158,9 @@ namespace DS_Network.Network
 
             foreach (var host in _hostLookup.Values)
             {
-                _client.Url = host.GetFullUrl();
+                _proxy.Url = host.GetFullUrl();
                 //call rpc method to sign off
-                _client.signOff(myIp);
+                _proxy.signOff(myIp);
             }
 
             _hostLookup.Clear();
@@ -178,12 +176,12 @@ namespace DS_Network.Network
                 Console.WriteLine("This client is not in network");
                 return;
             }
-            if (_masterNode == null)
-            {
-                Console.WriteLine("No master node is elected in the network");
-                Console.WriteLine("Please execute election command to elect master node in the network");
-                return;
-            }
+            //if (_masterNode == null)
+            //{
+            //    Console.WriteLine("No master node is elected in the network");
+            //    Console.WriteLine("Please execute election command to elect master node in the network");
+            //    return;
+            //}
 
             //TODO: 1. send message to all other nodes
             //IN LOOP for 20 seconds
@@ -215,14 +213,14 @@ namespace DS_Network.Network
             // TODO : master node reset
             _masterNode = null;
 
-            _bully.startBullyElection(_nodeInfo, _hostLookup, _client);
+            _bully.startBullyElection(_nodeInfo, _hostLookup, _proxy);
         }
 
         public void ElectMasterNodeByReceivingMsg(string id)
         {
             Console.WriteLine("Received Election message from " + id);
 
-            _bully.startBullyElection(_nodeInfo, _hostLookup, _client);
+            _bully.startBullyElection(_nodeInfo, _hostLookup, _proxy);
         }
 
         public void SetMasterNode(String ipAndPortMaster)
@@ -266,11 +264,11 @@ namespace DS_Network.Network
                 Thread.Sleep(sleepTime);
                 Console.WriteLine("Finished waiting for " + sleepTime / 1000 + " sec");
                 //initialize client to communicate with master node
-                _client.Url = _masterNode.GetFullUrl();
+                _proxy.Url = _masterNode.GetFullUrl();
 
                 //read resource
                 Console.WriteLine("Reading resource from mn " + _masterNode.GetIpAndPort());
-                var readResFromMn = _client.readResource(_nodeInfo.GetIpAndPort());
+                var readResFromMn = _proxy.readResource(_nodeInfo.GetIpAndPort());
 
                 //generate string
                 var randomStr = GetRandomFruit();
@@ -283,7 +281,7 @@ namespace DS_Network.Network
                 Console.WriteLine("Result of appended string " + appendedString);
 
                 //write updated string to the master node
-                _client.updateResource(appendedString, _nodeInfo.GetIpAndPort());
+                _proxy.updateResource(appendedString, _nodeInfo.GetIpAndPort());
                 Console.WriteLine("Updated string on mn " + _masterNode.GetIpAndPort());
 
                 var executeTime = DateTime.Now;
@@ -294,7 +292,7 @@ namespace DS_Network.Network
                 }
             } while (true);
 
-            var finalString = _client.readResource(_nodeInfo.GetIpAndPort());
+            var finalString = _proxy.readResource(_nodeInfo.GetIpAndPort());
             Console.WriteLine("Final string: " + finalString);
         }
 
