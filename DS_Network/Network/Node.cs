@@ -178,12 +178,12 @@ namespace DS_Network.Network
                 Console.WriteLine("This client is not in network");
                 return;
             }
-            if (_masterNode == null)
-            {
-                Console.WriteLine("No master node is elected in the network");
-                Console.WriteLine("Please execute election command to elect master node in the network");
-                return;
-            }
+            //if (_masterNode == null)
+            //{
+            //    Console.WriteLine("No master node is elected in the network");
+            //    Console.WriteLine("Please execute election command to elect master node in the network");
+            //    return;
+            //}
 
             //TODO: 1. send message to all other nodes
             //IN LOOP for 20 seconds
