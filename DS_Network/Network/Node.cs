@@ -191,7 +191,7 @@ namespace DS_Network.Network
 
             //NOTE: read and write operations should be syncronized
 
-            Elect();
+            ElectMasterNode();
 
         }
 
