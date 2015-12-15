@@ -15,7 +15,8 @@ namespace DS_Network.Helpers
             "start",
             "signoff",
             "start",
-            "gethosts"
+            "gethosts",
+            "election"
         }; 
 
         public static String[] GetCommandArray(string command)

@@ -14,14 +14,19 @@ namespace DS_Network.Network
         bool signOff(String ipAndPort);
 
         [XmlRpcMethod("Host.start")]
-        bool start(int id);
+        bool start();
 
         [XmlRpcMethod("Host.getHosts")]
-        //[XmlRpcMethod("getHosts")]
         Object[] getHosts(String ipAndPortCallee);
 
         [XmlRpcMethod("Host.addNewHost")]
         void addNewHost(String ipAndPort);
+
+        [XmlRpcMethod("Host.receiveElectionMsg")]
+        bool ReceiveElectionMsg(string id);
+
+        [XmlRpcMethod("Host.setMasterNode")]
+        void SetMasterNode(string ipAndPort);
     }
 }
 

@@ -20,7 +20,9 @@ namespace DS_Network
             server.Run();
             //client.Run();
 
-            Console.WriteLine(client.NodeInfo.GetIpAndPort());
+            Console.WriteLine("Client IP: " + client.NodeInfo.GetIpAndPort());
+            Console.WriteLine("Client ID: " + client.NodeInfo.Id);
+            
             while (true)
             {
                 

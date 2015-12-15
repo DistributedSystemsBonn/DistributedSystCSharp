@@ -6,7 +6,7 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Http;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using CookComputing.XmlRpc;
 
 namespace DS_Network.Network
@@ -101,6 +101,24 @@ namespace DS_Network.Network
               "xmlrpc",
               //"/",
               WellKnownObjectMode.Singleton);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public bool ReceiveElectionMsg(string id)
+        {
+            Thread election = new Thread(() => _client.ElectMasterNodeByReceivingMsg(id));
+            election.Start();
+
+            return true;    // always return true;
+        }
+
+        public void SetMasterNode(String ipAndPortMaster)
+        {
+            _client.SetMasterNode(ipAndPortMaster);
         }
     }
 }

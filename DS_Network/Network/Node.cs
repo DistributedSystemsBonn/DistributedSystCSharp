@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using DS_Network.Helpers;
+using System.Threading;
 
 namespace DS_Network.Network
 {
@@ -12,6 +13,9 @@ namespace DS_Network.Network
         private Dictionary<String, NodeInfo> _hostLookup = new Dictionary<String, NodeInfo>();
         private IConnectionProxy _client;
         private NodeInfo _nodeInfo;
+
+        private static Bully _bully = new Bully();
+        private NodeInfo _masterNode;
 
         public Dictionary<String, NodeInfo> HostLookup
         {
@@ -25,7 +29,7 @@ namespace DS_Network.Network
         {
             get
             {
-                return _nodeInfo;;
+                return _nodeInfo; ;
             }
         }
 
@@ -73,6 +77,10 @@ namespace DS_Network.Network
                 {
                     PrintHosts();
                 }
+                else if (commandName == "election")
+                {
+                    ElectMasterNode();
+            }
             }
             else
             {
@@ -153,8 +161,23 @@ namespace DS_Network.Network
             _hostLookup.Clear();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Start()
         {
+            if (_hostLookup.Count == 0)
+            {
+                Console.WriteLine("This client is not in network");
+                return;
+            }
+            if (_masterNode == null)
+            {
+                Console.WriteLine("No master node is elected in the network");
+                Console.WriteLine("Please execute election command to elect master node in the network");
+                return;
+            }
+
             //TODO: 1. send message to all other nodes
             //IN LOOP for 20 seconds
             //2. wait random amount of time
@@ -172,17 +195,37 @@ namespace DS_Network.Network
 
         }
 
-        public void Elect()
+        /// <summary>
+        /// Start Election of Master Node
+        /// </summary>
+        public void ElectMasterNode()
         {
             if (_hostLookup.Count == 0)
             {
-                throw new ArgumentException("Computer is not in network");
+                Console.WriteLine("This client is not in network");
+                return;
             }
 
-            foreach (var node in _hostLookup)
-            {
-                _client.start();
-            }
+            // TODO : master node reset
+            _masterNode = null;
+
+            _bully.startBullyElection(_nodeInfo, _hostLookup, _client);
+        }
+
+        public void ElectMasterNodeByReceivingMsg(string id)
+        {
+            Console.WriteLine("Received Election message from " + id);
+
+            _bully.startBullyElection(_nodeInfo, _hostLookup, _client);
+        }
+
+        public void SetMasterNode(String ipAndPortMaster)
+        {
+            _masterNode = new NodeInfo(ipAndPortMaster);
+
+            Console.WriteLine("Master is elected: " + _masterNode.GetIpAndPort());
+
+            _bully.finishElection();
         }
     }
 }
