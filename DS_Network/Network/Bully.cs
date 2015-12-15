@@ -56,6 +56,7 @@ namespace DS_Network.Network
                 {
                     sendElectionFinalMsg(node, host, proxy);
                 }
+                sendElectionFinalMsg(node, node, proxy);    // set masternode itself
             }
 
             _isElectionFinished.WaitOne();  // wait for end of all of election processes
