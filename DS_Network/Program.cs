@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ServiceModel;
 using System.Text.RegularExpressions;
 using CookComputing.XmlRpc;
+using DS_Network.Election;
 using DS_Network.Helpers;
 using DS_Network.Network;
+using DS_Network.Sync.Ricart;
 
 namespace DS_Network
 {
@@ -13,10 +15,14 @@ namespace DS_Network
         static void Main(string[] args)
         {
             var proxy = XmlRpcProxyGen.Create<IConnectionProxy>();
-            int port = NetworkHelper.FindFreePort();
+            var port = NetworkHelper.FindFreePort();
+            var electAlg = new Bully();
+            var ipAddress = NetworkHelper.FindIp().ToString();
+            var nodeInfo = new NodeInfo(ipAddress, port);
+            var syncAlgorithm = new RicartSyncAlgorithm(nodeInfo.Id);
 
-            var client = new Node(proxy, port); //client
-            var server = new Server(port, client);
+            var client = new Node(nodeInfo, proxy, electAlg, syncAlgorithm.Client, port); //client
+            var server = new Server(port, syncAlgorithm.Server, client);
             server.Run();
 
             Console.WriteLine("Client IP: " + client.NodeInfo.GetIpAndPort());

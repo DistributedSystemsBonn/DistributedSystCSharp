@@ -8,6 +8,7 @@ using System.Runtime.Remoting.Channels.Http;
 using System.Text;
 using System.Threading;
 using CookComputing.XmlRpc;
+using DS_Network.Sync;
 
 namespace DS_Network.Network
 {
@@ -15,16 +16,18 @@ namespace DS_Network.Network
     {
         private int _port;
         private static Node _client;
+        private static ISyncAlgorithmServer _syncAlgorithmServer;
 
         public Server()
         {
             
         }
 
-        public Server(int port, Node client)
+        public Server(int port, ISyncAlgorithmServer syncAlg, Node client)
         {
             _port = port;
             _client = client;
+            _syncAlgorithmServer = syncAlg;
         }
 
         public bool join(string ipAndPort)

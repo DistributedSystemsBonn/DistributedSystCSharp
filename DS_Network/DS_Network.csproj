@@ -47,24 +47,30 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers\Message.cs" />
+    <Compile Include="Election\Bully.cs" />
+    <Compile Include="Election\IElectionAlgorithm.cs" />
     <Compile Include="Helpers\NetworkHelper.cs" />
     <Compile Include="Helpers\StringHelper.cs" />
-    <Compile Include="Network\Bully.cs" />
     <Compile Include="Network\IConnectionProxy.cs" />
     <Compile Include="Network\IConnectionService.cs" />
-    <Compile Include="Network\IServer.cs" />
-    <Compile Include="Network\MasterNode.cs" />
     <Compile Include="Network\Node.cs" />
     <Compile Include="Network\NodeInfo.cs" />
     <Compile Include="Network\Server.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sync\AccessState.cs" />
+    <Compile Include="Sync\DataRequest.cs" />
+    <Compile Include="Sync\ISyncAlgorithmClient.cs" />
+    <Compile Include="Sync\ISyncAlgorithmServer.cs" />
+    <Compile Include="Sync\Ricart\RicartSyncAlgorithm.cs" />
+    <Compile Include="Sync\Ricart\RicartSyncAlgorithmClient.cs" />
+    <Compile Include="Sync\Ricart\RicartSyncAlgorithmServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="Properties\DataSources\WcfService.CompositeType.datasource" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

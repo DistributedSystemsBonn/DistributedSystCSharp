@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using DS_Network.Network;
 
-namespace DS_Network.Network
+namespace DS_Network.Election
 {
-    class Bully
+    public class Bully : IElectionAlgorithm
     {
         public static ManualResetEvent _isElectionFinished = new ManualResetEvent(false);
         public static ManualResetEvent _isThisNodeLost = new ManualResetEvent(false);
@@ -24,7 +25,7 @@ namespace DS_Network.Network
             _isExecuted = false;
         }
 
-        public void startBullyElection(NodeInfo node, Dictionary<String, NodeInfo> hostLookup, IConnectionProxy proxy)
+        public void startBullyElection(NodeInfo node, Dictionary<string, NodeInfo> hostLookup, IConnectionProxy proxy)
         {
             if (_isExecuted)    // to assure single execution
                 return;
@@ -64,7 +65,7 @@ namespace DS_Network.Network
             BullyReset();
         }
 
-        private void sendElectionMsg(NodeInfo node, NodeInfo target, IConnectionProxy proxy)
+        public void sendElectionMsg(NodeInfo node, NodeInfo target, IConnectionProxy proxy)
         {
             proxy.Url = target.GetFullUrl();
             if (proxy.ReceiveElectionMsg(node.Id.ToString()))
@@ -74,7 +75,7 @@ namespace DS_Network.Network
             }
         }
 
-        private void sendElectionFinalMsg(NodeInfo node, NodeInfo target, IConnectionProxy proxy)
+        public void sendElectionFinalMsg(NodeInfo node, NodeInfo target, IConnectionProxy proxy)
         {
             proxy.Url = target.GetFullUrl();
             proxy.SetMasterNode(node.GetIpAndPort());

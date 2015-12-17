@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using DS_Network.Helpers;
 using System.Threading;
+using DS_Network.Election;
+using DS_Network.Sync;
 
 namespace DS_Network.Network
 {
@@ -17,10 +19,11 @@ namespace DS_Network.Network
         private IConnectionProxy _proxy;
         private NodeInfo _nodeInfo;
         private static DateTime _startTime;
-        private string _resource = String.Empty;
-        private static Bully _bully = new Bully();
+        private static IElectionAlgorithm _electionAlgorithm;
         private NodeInfo _masterNode;
         private static TimeSpan _maxDuration = new TimeSpan(0, 0, 20);
+        private static AccessState _state = AccessState.Released;
+        private ISyncAlgorithmClient _syncAlgorithm;
 
         public string Resource { get; set; }
 
@@ -40,12 +43,12 @@ namespace DS_Network.Network
             }
         }
 
-        public Node(IConnectionProxy client, int port) //ServiceReference1.Service1Client client
+        public Node(NodeInfo nodeInfo, IConnectionProxy client, IElectionAlgorithm electionAlgorithm, ISyncAlgorithmClient syncAlgorithmClient, int port) //ServiceReference1.Service1Client client
         {
             _proxy = client;
-            var ipAddress = NetworkHelper.FindIp().ToString();
-            
-            _nodeInfo = new NodeInfo(ipAddress, port);
+            _nodeInfo = nodeInfo;
+            _electionAlgorithm = electionAlgorithm;
+            _syncAlgorithm = syncAlgorithmClient;
         }
 
         public void ProcessCommand(string command)
@@ -213,14 +216,14 @@ namespace DS_Network.Network
             // TODO : master node reset
             _masterNode = null;
 
-            _bully.startBullyElection(_nodeInfo, _hostLookup, _proxy);
+            _electionAlgorithm.startBullyElection(_nodeInfo, _hostLookup, _proxy);
         }
 
         public void ElectMasterNodeByReceivingMsg(string id)
         {
             Console.WriteLine("Received Election message from " + id);
 
-            _bully.startBullyElection(_nodeInfo, _hostLookup, _proxy);
+            _electionAlgorithm.startBullyElection(_nodeInfo, _hostLookup, _proxy);
         }
 
         public void SetMasterNode(String ipAndPortMaster)
@@ -229,7 +232,7 @@ namespace DS_Network.Network
 
             Console.WriteLine("Master is elected: " + _masterNode.GetIpAndPort());
 
-            _bully.finishElection();
+            _electionAlgorithm.finishElection();
 
             //START ALGORITHM. Because we know our master node. 
             StartAlgorithm();
@@ -267,22 +270,30 @@ namespace DS_Network.Network
                 _proxy.Url = _masterNode.GetFullUrl();
 
                 //read resource
-                Console.WriteLine("Reading resource from mn " + _masterNode.GetIpAndPort());
+                LogHelper.WriteStatus("Reading resource from mn " + _masterNode.GetIpAndPort());
+                _syncAlgorithm.SendSyncRequest(_proxy, _hostLookup.Values.ToList());
+
                 var readResFromMn = _proxy.readResource(_nodeInfo.GetIpAndPort());
+
+                _syncAlgorithm.Release();
 
                 //generate string
                 var randomStr = GetRandomFruit();
-                Console.WriteLine("Generated string: " + randomStr);
+                LogHelper.WriteStatus("Generated string: " + randomStr);
 
                 //append string
                 var appendedString = String.Concat(readResFromMn, randomStr);
                 //add appended string to list
                 _appendedStringSet.Add(appendedString);
-                Console.WriteLine("Result of appended string " + appendedString);
+                LogHelper.WriteStatus("Result of appended string " + appendedString);
 
                 //write updated string to the master node
+                _syncAlgorithm.SendSyncRequest(_proxy, _hostLookup.Values.ToList());
+
                 _proxy.updateResource(appendedString, _nodeInfo.GetIpAndPort());
-                Console.WriteLine("Updated string on mn " + _masterNode.GetIpAndPort());
+                _syncAlgorithm.Release();
+                LogHelper.WriteStatus("Updated string on mn " + _masterNode.GetIpAndPort());
+
 
                 var executeTime = DateTime.Now;
                 if (TimeSpan.Compare(executeTime - _startTime, _maxDuration) >= 0)
@@ -300,5 +311,7 @@ namespace DS_Network.Network
         {
             return _nodeInfo.IsSameHost(_masterNode);
         }
+
+
     }
 }
