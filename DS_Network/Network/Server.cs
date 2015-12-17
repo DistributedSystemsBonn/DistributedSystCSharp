@@ -12,7 +12,7 @@ using DS_Network.Sync;
 
 namespace DS_Network.Network
 {
-    public class Server : MarshalByRefObject, IConnectionService
+    public class Server : MarshalByRefObject, IConnectionService, ISyncAlgorithmServer
     {
         private int _port;
         private static Node _client;
@@ -139,6 +139,11 @@ namespace DS_Network.Network
         {
             Console.WriteLine("Update resource from: " + ipAndPort);
             _client.Resource = updateStr;
+        }
+
+        public bool GetSyncRequest(int timestamp, long id)
+        {
+            return _syncAlgorithmServer.GetSyncRequest(timestamp, id);
         }
     }
 }
