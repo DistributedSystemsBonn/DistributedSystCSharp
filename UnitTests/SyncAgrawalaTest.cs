@@ -9,6 +9,7 @@ namespace UnitTests
         [Test]
         public void TestAlgorithm()
         {
+            JoinNetwork();
             Elect();
 
             foreach (var host in Hosts)

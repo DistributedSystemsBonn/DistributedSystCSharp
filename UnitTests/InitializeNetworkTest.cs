@@ -10,15 +10,24 @@ using UnitTests.Mocks;
 namespace UnitTests
 {
     [TestFixture]
-    public class InitializeNetworkTest
+    //[SetUpFixture]
+    public abstract class InitializeNetworkTest
     {
         public Host MasterHost;
         public List<Host> Hosts = new List<Host>();
         public int HostNumber = 4;
 
+        private static bool initialized = false;
+
         [SetUp]
-        public void Init()
+        //[OneTimeSetUp]
+        public virtual void Init()
         {
+            //if (initialized) Assert.Fail("fixture setup called multiple times");
+            if (initialized) return;
+
+            initialized = true;
+
             var hostLookup = new Dictionary<String, Host>();
             var mockProxy = new ConnectionProxyMock(hostLookup);
 

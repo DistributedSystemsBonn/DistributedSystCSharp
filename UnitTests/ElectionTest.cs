@@ -10,7 +10,8 @@ namespace UnitTests
         [Test]
         public void Elect()
         {
-            JoinNetwork();
+            //Init();
+            //JoinNetwork();
 
             Hosts.First().Client.ElectMasterNode();
 
