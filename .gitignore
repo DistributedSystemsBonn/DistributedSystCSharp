@@ -18,6 +18,8 @@ x86/
 bld/
 **/[Bb]in/
 **/[Oo]bj/
+./DS_Network/bin/Debug/.*
+
 
 # Roslyn cache directories
 *.ide/

@@ -122,7 +122,7 @@ namespace DS_Network.Network
         public void SetMasterNode(String ipAndPortMaster)
         {
             Console.WriteLine("Set Master Node: " + ipAndPortMaster);
-            _client.SetMasterNode(ipAndPortMaster);
+            _client.SetMasterNode(ipAndPortMaster, true);
         }
 
         /// <summary>

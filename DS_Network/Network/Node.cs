@@ -27,6 +27,11 @@ namespace DS_Network.Network
 
         public string Resource { get; set; }
 
+        public NodeInfo MasterNode
+        {
+            get { return _masterNode; }
+        }
+
         public Dictionary<String, NodeInfo> HostLookup
         {
             get
@@ -201,25 +206,25 @@ namespace DS_Network.Network
             _electionAlgorithm.startBullyElection(_nodeInfo, _hostLookup, _proxy);
         }
 
-        public void SetMasterNode(String ipAndPortMaster)
+        /// <summary>
+        /// Setting master node. And starting algorithm if needed
+        /// </summary>
+        /// <param name="ipAndPortMaster"></param>
+        /// <param name="isStartNeeded"></param>
+        public void SetMasterNode(String ipAndPortMaster, bool isStartNeeded)
         {
             _masterNode = new NodeInfo(ipAndPortMaster);
 
             Console.WriteLine("Master is elected: " + _masterNode.GetIpAndPort());
 
             _electionAlgorithm.finishElection();
-<<<<<<< HEAD
-            //START ALGORITHM. Because we know our master node. 
-            var startAlgorithm = new Thread(() => StartAlgorithm());
-            startAlgorithm.Start();
-=======
-            //Thread.Sleep(10000);
-            //START ALGORITHM. Because we know our master node. 
-            //StartAlgorithm();
-            Thread startAlgorithm = new Thread(() => StartAlgorithm());
-            startAlgorithm.Start();
 
->>>>>>> 8cd300a7c2dd036da62a856643b544f1a5e63f32
+            //if (isStartNeeded)
+            //{
+            //    //START ALGORITHM. Because we know our master node. 
+            //    var startAlgorithm = new Thread(() => StartAlgorithm());
+            //    startAlgorithm.Start();
+            //}
         }
 
         private string GetRandomFruit()
