@@ -208,9 +208,18 @@ namespace DS_Network.Network
             Console.WriteLine("Master is elected: " + _masterNode.GetIpAndPort());
 
             _electionAlgorithm.finishElection();
+<<<<<<< HEAD
             //START ALGORITHM. Because we know our master node. 
             var startAlgorithm = new Thread(() => StartAlgorithm());
             startAlgorithm.Start();
+=======
+            //Thread.Sleep(10000);
+            //START ALGORITHM. Because we know our master node. 
+            //StartAlgorithm();
+            Thread startAlgorithm = new Thread(() => StartAlgorithm());
+            startAlgorithm.Start();
+
+>>>>>>> 8cd300a7c2dd036da62a856643b544f1a5e63f32
         }
 
         private string GetRandomFruit()
