@@ -233,9 +233,12 @@ namespace DS_Network.Network
             Console.WriteLine("Master is elected: " + _masterNode.GetIpAndPort());
 
             _electionAlgorithm.finishElection();
-
+            //Thread.Sleep(10000);
             //START ALGORITHM. Because we know our master node. 
-            StartAlgorithm();
+            //StartAlgorithm();
+            Thread startAlgorithm = new Thread(() => StartAlgorithm());
+            startAlgorithm.Start();
+
         }
 
         private string GetRandomFruit()
