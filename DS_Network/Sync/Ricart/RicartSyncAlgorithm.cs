@@ -80,6 +80,7 @@ namespace DS_Network.Sync.Ricart
         public RicartSyncAlgorithm(long localId)
         {
             State = AccessState.Released;
+            Queue = new List<DataRequest>();
             Client = new RicartSyncAlgorithmClient(this);
             Server = new RicartSyncAlgorithmServer(this, localId);
         }

@@ -18,11 +18,11 @@ namespace DS_Network.Network
         private HashSet<string> _appendedStringSet = new HashSet<string>(); 
         private IConnectionProxy _proxy;
         private NodeInfo _nodeInfo;
-        private static DateTime _startTime;
-        private static IElectionAlgorithm _electionAlgorithm;
+        private DateTime _startTime;
+        private IElectionAlgorithm _electionAlgorithm;
         private NodeInfo _masterNode;
         private static TimeSpan _maxDuration = new TimeSpan(0, 0, 20);
-        private static AccessState _state = AccessState.Released;
+        private AccessState _state = AccessState.Released;
         private ISyncAlgorithmClient _syncAlgorithm;
 
         public string Resource { get; set; }
@@ -63,12 +63,6 @@ namespace DS_Network.Network
                     throw new ArgumentException("Only join command can be with parameter");
                 }
                 var commandParameter = commandArr[1];
-
-                String[] obj = commandParameter.Split(':');
-                string ip = obj[0];
-                int port = Convert.ToInt32(obj[1]);
-
-                //IPAddress toJoinAddress = StringHelper.ConvertIpAddress(commandParameter);
                 Join(commandParameter);
             }
             else if (commandArr.Length == 1)
@@ -179,25 +173,6 @@ namespace DS_Network.Network
                 Console.WriteLine("This client is not in network");
                 return;
             }
-            //if (_masterNode == null)
-            //{
-            //    Console.WriteLine("No master node is elected in the network");
-            //    Console.WriteLine("Please execute election command to elect master node in the network");
-            //    return;
-            //}
-
-            //TODO: 1. send message to all other nodes
-            //IN LOOP for 20 seconds
-            //2. wait random amount of time
-            //3. read string variable from master node
-            //4. append some random english word to this string
-            //5. write updated string to master node
-            //END LOOP
-
-            //6. Node fetches from Master node the final string
-            //7. And writes this final string on screen
-
-            //NOTE: read and write operations should be syncronized
 
             ElectMasterNode();
         }
@@ -233,17 +208,17 @@ namespace DS_Network.Network
             Console.WriteLine("Master is elected: " + _masterNode.GetIpAndPort());
 
             _electionAlgorithm.finishElection();
-
             //START ALGORITHM. Because we know our master node. 
-            StartAlgorithm();
+            var startAlgorithm = new Thread(() => StartAlgorithm());
+            startAlgorithm.Start();
         }
 
         private string GetRandomFruit()
         {
-            Random rnd = new Random();
+            var rnd = new Random();
 
             string[] fruits = { "apple", "mango", "papaya", "banana", "guava", "pineapple" };
-            return fruits[rnd.Next(0, fruits.Length)];
+            return fruits[rnd.Next(0, fruits.Length)] + rnd.Next();
         }
 
         public void StartAlgorithm()
@@ -311,7 +286,5 @@ namespace DS_Network.Network
         {
             return _nodeInfo.IsSameHost(_masterNode);
         }
-
-
     }
 }

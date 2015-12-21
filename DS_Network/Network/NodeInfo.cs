@@ -21,40 +21,10 @@ namespace DS_Network.Network
             }
         }
 
-        //public Guid? Id
-        //{
-        //    get
-        //    {
-        //        if (_id == String.Empty)
-        //        {
-        //            return null;
-        //        }
-
-        //        return new Guid(_id);
-        //    }
-        //    set { _ip = value.ToString(); }
-        //}
-
         public string GetIpAndPort()
         {
             return _ip + ":" + _port;
         }
-
-        //public int GetGuidCode()
-        //{
-        //    Guid id = Guid.Empty;
-        //    if (Id != null)
-        //    {
-        //        id = (Guid) Id;
-        //    }
-        //    else
-        //    {
-        //        throw new ArgumentException("Guid cannot be null when getting code");
-        //    }
-
-        //    var chars = id.ToByteArray();
-        //    return BitConverter.ToInt32(chars, 0);
-        //}
 
         public int Compare(NodeInfo host2)
         {
@@ -99,7 +69,7 @@ namespace DS_Network.Network
 
         public NodeInfo(string ipAndPort)
         {
-            String[] obj = ipAndPort.Split(':');
+            var obj = ipAndPort.Split(':');
             _ip = obj[0];
             _port = Convert.ToInt32(obj[1]);
             InitId(_ip, _port);

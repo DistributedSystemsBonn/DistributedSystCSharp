@@ -52,6 +52,7 @@
     <Compile Include="Helpers\LogHelper.cs" />
     <Compile Include="Helpers\NetworkHelper.cs" />
     <Compile Include="Helpers\StringHelper.cs" />
+    <Compile Include="Network\Host.cs" />
     <Compile Include="Network\IConnectionProxy.cs" />
     <Compile Include="Network\IConnectionService.cs" />
     <Compile Include="Network\Node.cs" />

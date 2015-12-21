@@ -7,9 +7,9 @@ namespace DS_Network.Election
 {
     public class Bully : IElectionAlgorithm
     {
-        public static ManualResetEvent _isElectionFinished = new ManualResetEvent(false);
-        public static ManualResetEvent _isThisNodeLost = new ManualResetEvent(false);
-        public static bool _isExecuted = false;
+        public ManualResetEvent _isElectionFinished = new ManualResetEvent(false);
+        public ManualResetEvent _isThisNodeLost = new ManualResetEvent(false);
+        public bool _isExecuted = false;
         
         public Bully()
         {

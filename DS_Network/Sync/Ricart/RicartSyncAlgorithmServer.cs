@@ -27,40 +27,6 @@ namespace DS_Network.Sync.Ricart
                 Id = _localId,
                 CallerId = id
             };
-            // place into queue
-            //Implementation 1
-            //_module.AddRequest(request);
-            
-            //// Main await loop
-            //while (true)
-            //{
-            //    lock (_module.QueueLock)
-            //    {
-            //        if (_localId == id
-            //            || !_module.IsInterested
-            //            || HasPriority(timestamp, id))
-            //        {
-            //            _module.PopRequest(request);
-            //            return true;
-            //        }
-            //    }
-            //    Thread.Sleep(5);
-            //}
-
-            //while (true)
-            //{
-            //    if (_module.State == AccessState.Held ||
-            //    (_module.State == AccessState.Requested && !HasPriority(timestamp, id)))
-            //    {
-            //        _module.AddRequest(request);
-            //        Thread.Sleep(5);
-            //    }
-            //    else
-            //    {
-            //        return true;
-            //        //TODO: reply to p_j
-            //    }
-            //}
 
             while (true)
             {
@@ -87,14 +53,5 @@ namespace DS_Network.Sync.Ricart
                 Thread.Sleep(5);
             }
         }
-
-        //private bool HasPriority(int remoteTime, long remoteId)
-        //{
-        //    if (_module.RequestTime > remoteTime)
-        //        return true;
-        //    if (_module.RequestTime < remoteTime)
-        //        return false;
-        //    return remoteId < _localId;
-        //}
     }
 }

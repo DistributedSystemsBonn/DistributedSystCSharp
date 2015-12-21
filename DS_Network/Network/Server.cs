@@ -15,8 +15,8 @@ namespace DS_Network.Network
     public class Server : MarshalByRefObject, IConnectionService, ISyncAlgorithmServer
     {
         private int _port;
-        private static Node _client;
-        private static ISyncAlgorithmServer _syncAlgorithmServer;
+        private Node _client;
+        private ISyncAlgorithmServer _syncAlgorithmServer;
 
         public Server()
         {
@@ -90,7 +90,7 @@ namespace DS_Network.Network
         public void Run()
         {
             IDictionary props = new Hashtable();
-            props["name"] = "MyHttpChannel";
+            props["name"] = "MyHttpChannel" + ChannelServices.RegisteredChannels.Length;
             props["port"] = _port;
             var channel = new HttpChannel(
               props,
@@ -98,7 +98,7 @@ namespace DS_Network.Network
               new XmlRpcServerFormatterSinkProvider()
            );
             ChannelServices.RegisterChannel(channel, false);
-
+            
             RemotingConfiguration.RegisterWellKnownServiceType(
               typeof(Server),
               "xmlrpc",
