@@ -1,4 +1,5 @@
 ﻿using System;
+using DS_Network.Helpers;
 
 namespace DS_Network.Network
 {
@@ -42,12 +43,12 @@ namespace DS_Network.Network
 
         public new string ToString()
         {
-            return "http://" + _ip + ":" + _port + "/";
+            return NetworkHelper.FormUrl(_ip, _port);
         }
 
         public string GetFullUrl()
         {
-            return ToString() + "xmlrpc";
+            return NetworkHelper.FormXmlRpcUrl(_ip, _port);
         }
 
         public void InitId(string ip, int port)

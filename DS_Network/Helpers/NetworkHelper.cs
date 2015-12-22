@@ -17,6 +17,16 @@ namespace DS_Network.Helpers
             return port;
         }
 
+        public static string FormUrl(string ip, int port)
+        {
+            return "http://" + ip + ":" + port + "/";
+        }
+
+        public static string FormXmlRpcUrl(string ip, int port)
+        {
+            return FormUrl(ip, port) + "xmlrpc";
+        }
+
         public static IPAddress FindIp()
         {
             IPHostEntry host;

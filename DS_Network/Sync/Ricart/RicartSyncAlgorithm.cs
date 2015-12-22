@@ -17,7 +17,7 @@ namespace DS_Network.Sync.Ricart
 
         private DateTime _lastRequestTS;
 
-        private static List<DataRequest> Queue { get; set; }
+        public List<DataRequest> Queue { get; set; }
 
         #region Lamport Clock
 
@@ -45,7 +45,7 @@ namespace DS_Network.Sync.Ricart
             LogHelper.WriteStatus("Server: Add request to queue: " + request.CallerId + " with timestamp: " +
                                           request.Time);
             Queue.Add(request);
-            Queue = Queue.OrderBy(x => x.Time).ThenBy(x => x.Time).ToList();
+            Queue = Queue.OrderBy(x => x.Time).ThenBy(x => x.CallerId).ToList();
 
                 //Queue = Queue.OrderBy(x => x.Time).ThenBy(x => x.CallerId).ToList();
             //}
