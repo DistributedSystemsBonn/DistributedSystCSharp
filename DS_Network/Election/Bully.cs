@@ -52,7 +52,7 @@ namespace DS_Network.Election
             {
                 Console.WriteLine("Time out - client won");
 
-                // TODO : Declare "I'm the new master" to all the nodes in the network
+                // Declare "I'm the new master" to all the nodes in the network
                 foreach (NodeInfo host in hostLookup.Values)
                 {
                     sendElectionFinalMsg(node, host, proxy);
