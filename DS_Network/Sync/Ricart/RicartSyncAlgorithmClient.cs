@@ -25,16 +25,15 @@ namespace DS_Network.Sync.Ricart
             LogHelper.WriteStatus("Client: Current timestamp: " + timestamp);
             _module.IsInterested = true;
 
-            List<Task> sendTasks = new List<Task>();
+            var sendTasks = new List<Task>();
 
             foreach (var host in toSendHosts)
             {
                 var hostId = host.Id;
+
                 proxy.Url = host.GetFullUrl();
                 LogHelper.WriteStatus("Client: Send request to: " + hostId);
                 sendTasks.Add(Task.Factory.StartNew(() => SendSyncMsg(proxy, timestamp, hostId)));
-                //var sendTask = new Thread(() => SendSyncMsg(proxy, timestamp, hostId));
-                //sendTask.Start();
             }
             Task.WaitAll(sendTasks.ToArray());
 

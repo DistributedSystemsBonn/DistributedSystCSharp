@@ -238,6 +238,7 @@ namespace DS_Network.Network
         public void StartAlgorithm()
         {
             var rnd = new Random();
+            //var hostList = _hostLookup.Values.ToList();
             int count = 0;
 
             if (IsMasterNode())
@@ -252,23 +253,7 @@ namespace DS_Network.Network
 
                 WaitRandomAmountTime(rnd);
                 
-                //initialize client to communicate with master node
-                var readResFromMn = ReadFromMasterNode();
-                _syncAlgorithm.Release();
-
-                //generate string
-                var randomStr = GetRandomFruit();
-                LogHelper.WriteStatus("Generated string: " + randomStr);
-
-                //append string
-                var appendedString = String.Concat(readResFromMn, randomStr);
-                //add appended string to list
-                _appendedStringSet.Add(appendedString);
-                LogHelper.WriteStatus("Result of appended string " + appendedString);
-
-                UpdateMasterNodeResource(appendedString);
-                _syncAlgorithm.Release();
-                LogHelper.WriteStatus("Updated string on mn " + _masterNode.GetIpAndPort());
+                ProcessResourceFromMasterNode();
 
                 var executeTime = DateTime.Now;
                 if (TimeSpan.Compare(executeTime - _startTime, _maxDuration) >= 0)
@@ -278,19 +263,50 @@ namespace DS_Network.Network
                 }
             } while (true);
 
-            var finalString = _proxy.readResource(_nodeInfo.GetIpAndPort());
+            var finalString = ReadFromMasterNode();
+            _syncAlgorithm.Release();
             Console.WriteLine("Final string: " + finalString);
         }
 
+        /// <summary>
+        /// Read, append and update
+        /// </summary>
+        private void ProcessResourceFromMasterNode()
+        {
+            _syncAlgorithm.SendSyncRequestToAllHosts(_proxy, GetHostListWithoutMaster());
+
+            //initialize client to communicate with master node
+            var readResFromMn = ReadFromMasterNode();
+
+            //generate string
+            var randomStr = GetRandomFruit();
+            LogHelper.WriteStatus("Generated string: " + randomStr);
+
+            //append string
+            var appendedString = String.Concat(readResFromMn, randomStr);
+            //add appended string to list
+            _appendedStringSet.Add(appendedString);
+            LogHelper.WriteStatus("Result of appended string " + appendedString);
+
+            UpdateMasterNodeResource(appendedString);
+            
+            _syncAlgorithm.Release();
+        }
+
+        /// <summary>
+        /// Reading from master node
+        /// </summary>
+        /// <returns></returns>
         private string ReadFromMasterNode()
         {
-            //read resource
-            LogHelper.WriteStatus("Reading resource from mn " + _masterNode.GetIpAndPort());
-            _syncAlgorithm.SendSyncRequestToAllHosts(_proxy, _hostLookup.Values.ToList());
-
+            LogHelper.WriteStatus("Reading resource from Master Node by host with IP: " + _nodeInfo.GetIpAndPort());
+            
             if (_masterNode.Id == _nodeInfo.Id) throw new ArgumentException("Cannot read resource from same HOST!");
             _proxy.Url = _masterNode.GetFullUrl();
-            return _proxy.readResource(_nodeInfo.GetIpAndPort());
+
+            var strResultFromMn = _proxy.readResource(_nodeInfo.GetIpAndPort());
+            LogHelper.WriteStatus("Reading resource result" + strResultFromMn + " by host with IP: " + _nodeInfo.GetIpAndPort());
+            return strResultFromMn;
         }
 
         private void WaitRandomAmountTime(Random rnd)
@@ -302,15 +318,26 @@ namespace DS_Network.Network
             Console.WriteLine("Finished waiting for " + sleepTime / 1000 + " sec");
         }
 
+        /// <summary>
+        /// write updated string to the master node
+        /// </summary>
+        /// <param name="appendedString"></param>
         private void UpdateMasterNodeResource(string appendedString)
         {
-            //write updated string to the master node
-            _syncAlgorithm.SendSyncRequestToAllHosts(_proxy, _hostLookup.Values.ToList());
-
             if (_masterNode.Id == _nodeInfo.Id) throw new ArgumentException("Cannot read resource from same HOST!");
             _proxy.Url = _masterNode.GetFullUrl();
             _proxy.updateResource(appendedString, _nodeInfo.GetIpAndPort());
+
+            LogHelper.WriteStatus("Updated string To Master Node with IP: " + _masterNode.GetIpAndPort());
         }
+
+        private List<NodeInfo> GetHostListWithoutMaster()
+        {
+            var listCopy = _hostLookup.Values.ToList();
+            listCopy.Add(_nodeInfo);
+            listCopy.RemoveAll(x => x.GetIpAndPort() == MasterNode.GetIpAndPort());
+            return listCopy;
+        } 
 
         public bool IsMasterNode()
         {

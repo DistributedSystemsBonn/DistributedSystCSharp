@@ -52,7 +52,7 @@ namespace UnitTests
             //var proxy2 = XmlRpcProxyGen.Create<IConnectionProxy>();
             var port2 = NetworkHelper.FindFreePort();
             var electAlg2 = new Bully();
-            var ipAddress2 = NetworkHelper.FindIp().ToString();
+            var ipAddress2 = "255.255.255.255";
             var nodeInfo2 = new NodeInfo(ipAddress2, port2);
             var syncAlgorithm2 = new RicartSyncAlgorithm(nodeInfo2.Id);
             var masterclient = new Node(nodeInfo2, mockProxy, electAlg2, syncAlgorithm2.Client, port2);
