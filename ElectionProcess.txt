@@ -1,0 +1,16 @@
+startBullyElection()
+	thread: sendElectionMsg()
+		=> call proxy.ReceiveElectionMsg() method of target host.
+			=> the receiver starts "election algorithm" thread and return true;
+		=> if the receiver is alive and returned true, then the sender sets 
+			_isThisNodeLost to True
+			=> The sender recognize that it is lost by some other host
+
+	if (_isThisNodeLost.WaitOne(timeout))
+	: if _isThisNodeLost value is set to True, then True
+	: or _isThisNodeLost doesn't changed until the time limit (int timeout) then False.
+		=> if True. do nothing.
+		=> if False. it received no response from others. so it is the winner.
+			=> sendElectionFinalMsg() : pass the master node's ip and port to all the nodes.
+				=> set _isElectionFinished value to True.
+	_isElectionFinished.WaitOne() : just wait to receive final message.
