@@ -21,8 +21,9 @@ namespace DS_Network.Sync.Ricart
         {
             _module.State = AccessState.Requested;
 
-            var timestamp = _module.IncrementClock();
-            LogHelper.WriteStatus("Client: Current timestamp: " + timestamp);
+            var logicClockTs = _module.LamportClock;
+            //var timestamp = _module.IncrementClock();
+            LogHelper.WriteStatus("Client: Current timestamp: " + logicClockTs);
             _module.IsInterested = true;
 
             var sendTasks = new List<Task>();
@@ -33,7 +34,7 @@ namespace DS_Network.Sync.Ricart
 
                 proxy.Url = host.GetFullUrl();
                 LogHelper.WriteStatus("Client: Send request to: " + hostId);
-                sendTasks.Add(Task.Factory.StartNew(() => SendSyncMsg(proxy, timestamp, hostId)));
+                sendTasks.Add(Task.Factory.StartNew(() => SendSyncMsg(proxy, logicClockTs, hostId)));
             }
             Task.WaitAll(sendTasks.ToArray());
 
@@ -45,7 +46,7 @@ namespace DS_Network.Sync.Ricart
         {
             if (proxy.GetSyncRequest(timestamp, id))
             {
-                
+                //_module.AdjustLastRequestTsToNow();
             }
         }
 
@@ -60,6 +61,9 @@ namespace DS_Network.Sync.Ricart
             //}
 
             LogHelper.WriteStatus("Client: Released resource");
+            //_module.AdjustLastRequestTsToNow();
         }
+
+        
     }
 }

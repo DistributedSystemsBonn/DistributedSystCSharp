@@ -289,7 +289,7 @@ namespace DS_Network.Network
             LogHelper.WriteStatus("Result of appended string " + appendedString);
 
             UpdateMasterNodeResource(appendedString);
-            
+
             _syncAlgorithm.Release();
         }
 

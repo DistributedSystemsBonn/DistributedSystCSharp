@@ -139,6 +139,7 @@ namespace DS_Network.Network
         {
             Console.WriteLine("Update resource from: " + ipAndPort);
             _client.Resource = updateStr;
+            //_module.AdjustLastRequestTsToNow();
         }
 
         public bool GetSyncRequest(int timestamp, long id)

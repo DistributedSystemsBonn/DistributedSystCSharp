@@ -7,31 +7,43 @@ namespace DS_Network.Sync.Ricart
 {
     public class RicartSyncAlgorithm
     {
+        private bool _isInterested;
+
+        public bool IsInterested
+        {
+            get { return _isInterested; }
+            set
+            {
+                //Is interested - local event
+                IncrementLamportClock();
+                _isInterested = value;
+            }
+        }
+
+        public int LamportClock { get; set; }
+
         public AccessState State { get; set; }
-        //TODO: queue
-        public int RequestTime;
 
         public Object QueueLock = new object();
-
-        public int ExactTime { get; private set; }
-
-        private DateTime _lastRequestTS;
 
         public List<DataRequest> Queue { get; set; }
 
         #region Lamport Clock
 
-        public int IncrementClock()
+        public int IncrementLamportClock()
         {
-            return ++ExactTime;
+            return ++LamportClock;
         }
 
         public int UpdateClock(int candidateValue)
         {
-            if (candidateValue > ExactTime)
-                ExactTime = candidateValue;
-            LogHelper.WriteStatus("Update clock to " + ExactTime);
-            return ExactTime;
+            if (candidateValue > LamportClock)
+            {
+                LamportClock = candidateValue;
+            }
+            IncrementLamportClock();
+            LogHelper.WriteStatus("Update clock to " + LamportClock);
+            return LamportClock;
         }
 
         #endregion Lamport Clock
@@ -40,15 +52,15 @@ namespace DS_Network.Sync.Ricart
 
         public void AddRequest(DataRequest request)
         {
-            //lock (QueueLock)
-            //{
+            if (Queue.Exists(x => x.Id == request.Id))
+            {
+                return;
+            }
+
             LogHelper.WriteStatus("Server: Add request to queue: " + request.CallerId + " with timestamp: " +
                                           request.Time);
             Queue.Add(request);
             Queue = Queue.OrderBy(x => x.Time).ThenBy(x => x.CallerId).ToList();
-
-                //Queue = Queue.OrderBy(x => x.Time).ThenBy(x => x.CallerId).ToList();
-            //}
         }
 
         public void PopRequest(DataRequest request)
@@ -66,16 +78,10 @@ namespace DS_Network.Sync.Ricart
             return Queue.Count;
         }
 
-        public long TimeFromRequest()
-        {
-            return (DateTime.Now.Ticks - _lastRequestTS.Ticks) / TimeSpan.TicksPerMillisecond;
-        }
-
         #endregion Request Queue
 
         public RicartSyncAlgorithmClient Client { get; set; }
         public RicartSyncAlgorithmServer Server { get; set; }
-        public bool IsInterested { get; set; }
 
         public RicartSyncAlgorithm(long localId)
         {

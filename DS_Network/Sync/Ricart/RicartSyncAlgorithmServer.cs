@@ -42,7 +42,7 @@ namespace DS_Network.Sync.Ricart
                 }
                 else if (_module.IsInterested)
                 {
-                    if (_module.RequestTime < timestamp)
+                    if (CompareTime(_module.LamportClock, timestamp, id))
                     {
                         _module.PopRequest(request);
                         return true;
@@ -52,6 +52,15 @@ namespace DS_Network.Sync.Ricart
                 }
                 Thread.Sleep(5);
             }
+        }
+
+        public bool CompareTime(int ownLamportClock, int requestLamportClock, long remoteId)
+        {
+            if (requestLamportClock < ownLamportClock)
+                return true;
+            if (requestLamportClock > ownLamportClock)
+                return false;
+            return remoteId < _localId;
         }
     }
 }
