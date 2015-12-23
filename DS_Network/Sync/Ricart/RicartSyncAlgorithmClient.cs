@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 using DS_Network.Helpers;
 using DS_Network.Network;
 
 namespace DS_Network.Sync.Ricart
 {
+    /// <summary>
+    /// Client part of ricart algorithm
+    /// </summary>
     public class RicartSyncAlgorithmClient : ISyncAlgorithmClient
     {
         private RicartSyncAlgorithm _module;
+        //lock until all messages received
         public ManualResetEvent HasGotAllMessagesBack = new ManualResetEvent(false);
 
         public RicartSyncAlgorithmClient(RicartSyncAlgorithm module)
@@ -26,23 +28,17 @@ namespace DS_Network.Sync.Ricart
             LogHelper.WriteStatus("Client: Current timestamp: " + logicClockTs);
             _module.IsInterested = true;
 
-            //var sendTasks = new List<Task>();
-            var newThreads = new List<Thread>();
-
             foreach (var host in toSendHosts)
             {
                 var newThread =
                     new Thread(
                         () => SendSyncMsg(_module.Proxy, host, logicClockTs));
-                newThreads.Add(newThread);
                 Debug.WriteLine("Client: Send request from: " + _module.LocalNodeInfo.GetIpAndPort() + " to: " + _module.Proxy.Url);
                 _module.Proxy.Url = host.GetFullUrl();
                 newThread.Start();
                 _module.Proxy.Url = host.GetFullUrl();
                 Thread.Sleep(15);
             }
-
-            Debug.WriteLine("Threads number at: " + _module.LocalNodeInfo.GetIpAndPort() + " : " + newThreads.Count);
 
             //wait until receive all messages. .Set() method is called in RicartSyncAlgServer
             HasGotAllMessagesBack.WaitOne();
@@ -65,14 +61,12 @@ namespace DS_Network.Sync.Ricart
 
             foreach (var request in _module.Queue)
             {
-                //TODO: init url correctly
-                _module.Proxy.Url = NetworkHelper.FormXmlRpcUrl(request.ipAndPort);
-                _module.Proxy.GetAcceptResponse(_module.LocalNodeInfo.GetIpAndPort());
+                _module.Server.SendAcceptResponse(request.ipAndPort);
             }
 
             _module.Queue.Clear();
 
-            LogHelper.WriteStatus("Client: Released resource");
+            LogHelper.WriteStatus("Client: Released resource at " + _module.LocalNodeInfo.GetIpAndPort());
         }
     }
 }

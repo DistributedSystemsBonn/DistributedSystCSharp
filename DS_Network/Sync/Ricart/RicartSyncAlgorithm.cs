@@ -59,11 +59,6 @@ namespace DS_Network.Sync.Ricart
 
         public void AddRequest(DataRequest request)
         {
-            if (Queue.Exists(x => x.Id == request.Id))
-            {
-                return;
-            }
-
             LogHelper.WriteStatus("Server: Add request to queue: " + request.CallerId + " with timestamp: " +
                                           request.Time);
             Queue.Add(request);
@@ -73,12 +68,9 @@ namespace DS_Network.Sync.Ricart
 
         public void PopRequest(DataRequest request)
         {
-            if (Queue.Contains(request))
-            {
-                Queue.Remove(request);
+            Queue.Remove(request);
                 LogHelper.WriteStatus("Server: Remove request from queue: " + request.CallerId + " with timestamp: " +
                                           request.Time);
-            }
         }
 
         public int GetQueueCount()

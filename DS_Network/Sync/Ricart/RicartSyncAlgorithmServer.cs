@@ -5,10 +5,12 @@ using DS_Network.Helpers;
 
 namespace DS_Network.Sync.Ricart
 {
+    /// <summary>
+    /// Server part of ricart algorithm
+    /// </summary>
     public class RicartSyncAlgorithmServer : ISyncAlgorithmServer
     {
         private RicartSyncAlgorithm _module;
-        //private long _localId;
 
         public RicartSyncAlgorithmServer(RicartSyncAlgorithm module)
         {
@@ -58,37 +60,33 @@ namespace DS_Network.Sync.Ricart
             }
         }
 
-        private void SendAcceptResponse(string ipAndPort)
+        public void SendAcceptResponse(string ipAndPort)
         {
             _module.Proxy.Url = NetworkHelper.FormXmlRpcUrl(ipAndPort);
             //send accept response with parameter which describes our host
-            _module.Proxy.GetAcceptResponse(_module.LocalNodeInfo.GetIpAndPort());
+            var newSendThread = new Thread(() => _module.Proxy.GetAcceptResponse(_module.LocalNodeInfo.GetIpAndPort()));
+            newSendThread.Start();
+            Thread.Sleep(5);
         }
 
         public void GetAcceptResponse(string fromIpAndPort)
         {
             var myIp = _module.LocalNodeInfo.GetIpAndPort();
             Debug.WriteLine("Start removing from " + myIp + " .Key with ip: " + fromIpAndPort);
-            if (_module.AcceptList.Exists(x => x == fromIpAndPort))
-            {
-                _module.AcceptList.Remove(fromIpAndPort);
-                Debug.WriteLine("List count from " + myIp + " = " + _module.AcceptList.Count);
-                //TODO: error handle. need to check
-                //return;
-                //throw new ArgumentException("Element in accept list doesnt exist: " + fromIpAndPort);
-            }
-            else
+            //if (_module.AcceptList.Exists(x => x == fromIpAndPort))
+            //{
+            if (!_module.AcceptList.Remove(fromIpAndPort))
             {
                 throw new ArgumentException("Element in accept list doesnt exist: " + fromIpAndPort);
             }
 
-            //_module.AcceptList.Remove(fromIpAndPort);
-
+            Debug.WriteLine("List count from " + myIp + " = " + _module.AcceptList.Count);
+            
             //check if all accept messages received. if yes, start accessing to resource
             if (_module.AcceptList.Count == 0)
             {
                 Debug.WriteLine("Reset event has got messages at host: " + myIp);
-                //TODO: ManualResetEvent _isAcceptMessagesFinished.Set() in Node
+                //ManualResetEvent _isAcceptMessagesFinished.Set() in Node
                 _module.Client.HasGotAllMessagesBack.Set();
             }
         }
