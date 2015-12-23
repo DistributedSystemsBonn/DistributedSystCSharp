@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using DS_Network.Helpers;
@@ -22,7 +23,6 @@ namespace DS_Network.Sync.Ricart
             _module.State = AccessState.Requested;
 
             var logicClockTs = _module.IncrementLamportClock();
-            //var timestamp = _module.IncrementClock();
             LogHelper.WriteStatus("Client: Current timestamp: " + logicClockTs);
             _module.IsInterested = true;
 
@@ -31,27 +31,31 @@ namespace DS_Network.Sync.Ricart
 
             foreach (var host in toSendHosts)
             {
-                var hostId = host.Id;
-
+                var newThread =
+                    new Thread(
+                        () => SendSyncMsg(_module.Proxy, host, logicClockTs));
+                newThreads.Add(newThread);
+                Debug.WriteLine("Client: Send request from: " + _module.LocalNodeInfo.GetIpAndPort() + " to: " + _module.Proxy.Url);
                 _module.Proxy.Url = host.GetFullUrl();
-                LogHelper.WriteStatus("Client: Send request to: " + hostId);
-                _module.AcceptList.Add(host.GetIpAndPort());
-                newThreads.Add(new Thread(() => _module.Proxy.GetSyncRequest(logicClockTs, hostId, _module.LocalNodeInfo.GetIpAndPort())));
-                //newTask.Start();
-                //sendTasks.Add(Task.Factory.StartNew(() => _module.Proxy.GetSyncRequest(logicClockTs, hostId)));
+                newThread.Start();
+                _module.Proxy.Url = host.GetFullUrl();
+                Thread.Sleep(15);
             }
 
-            foreach (var newThread in newThreads)
-            {
-                newThread.Start();
-            }
+            Debug.WriteLine("Threads number at: " + _module.LocalNodeInfo.GetIpAndPort() + " : " + newThreads.Count);
+
             //wait until receive all messages. .Set() method is called in RicartSyncAlgServer
             HasGotAllMessagesBack.WaitOne();
 
-            //Task.WaitAll(sendTasks.ToArray());
-
             LogHelper.WriteStatus("Client: Received all ACCEPT MESSAGES AT: " + _module.LocalId);
             _module.State = AccessState.Held;
+        }
+
+        public void SendSyncMsg(IConnectionProxy proxy, NodeInfo toNode, int logicClockTs)
+        {
+            _module.AcceptList.Add(toNode.GetIpAndPort());
+            proxy.Url = toNode.GetFullUrl();
+            _module.Proxy.GetSyncRequest(logicClockTs, toNode.Id, _module.LocalNodeInfo.GetIpAndPort());
         }
 
         public void Release()

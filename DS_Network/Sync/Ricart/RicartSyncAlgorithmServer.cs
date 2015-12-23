@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using DS_Network.Helpers;
 
@@ -7,7 +8,7 @@ namespace DS_Network.Sync.Ricart
     public class RicartSyncAlgorithmServer : ISyncAlgorithmServer
     {
         private RicartSyncAlgorithm _module;
-        private long _localId;
+        //private long _localId;
 
         public RicartSyncAlgorithmServer(RicartSyncAlgorithm module)
         {
@@ -22,7 +23,7 @@ namespace DS_Network.Sync.Ricart
         /// <param name="ipAndPort">Ip and port of host who calls this method</param>
         public void GetSyncRequest(int timestamp, long id, string ipAndPort)
         {
-            LogHelper.WriteStatus("Server: Start handling request from: " + id + " with timestamp: " + timestamp);
+            Debug.WriteLine("Server: Start handling at " + _module.LocalNodeInfo.GetIpAndPort() + " request from: " + ipAndPort + " with timestamp: " + timestamp);
 
             _module.UpdateClock(timestamp);
 
@@ -30,7 +31,7 @@ namespace DS_Network.Sync.Ricart
             var request = new DataRequest()
             {
                 Time = timestamp,
-                Id = _localId,
+                Id = _module.LocalId,
                 CallerId = id,
                 ipAndPort = ipAndPort
             };
@@ -50,8 +51,10 @@ namespace DS_Network.Sync.Ricart
                     //Send accept msg to callee
                     SendAcceptResponse(ipAndPort);
                 }
-
-                _module.AddRequest(request);
+                else
+                {
+                    _module.AddRequest(request);
+                }
             }
         }
 
@@ -65,19 +68,26 @@ namespace DS_Network.Sync.Ricart
         public void GetAcceptResponse(string fromIpAndPort)
         {
             var myIp = _module.LocalNodeInfo.GetIpAndPort();
-
-            if (!_module.AcceptList.Exists(x => x == fromIpAndPort))
+            Debug.WriteLine("Start removing from " + myIp + " .Key with ip: " + fromIpAndPort);
+            if (_module.AcceptList.Exists(x => x == fromIpAndPort))
             {
+                _module.AcceptList.Remove(fromIpAndPort);
+                Debug.WriteLine("List count from " + myIp + " = " + _module.AcceptList.Count);
                 //TODO: error handle. need to check
-                return;
+                //return;
                 //throw new ArgumentException("Element in accept list doesnt exist: " + fromIpAndPort);
             }
+            else
+            {
+                throw new ArgumentException("Element in accept list doesnt exist: " + fromIpAndPort);
+            }
 
-            _module.AcceptList.Remove(fromIpAndPort);
+            //_module.AcceptList.Remove(fromIpAndPort);
 
             //check if all accept messages received. if yes, start accessing to resource
             if (_module.AcceptList.Count == 0)
             {
+                Debug.WriteLine("Reset event has got messages at host: " + myIp);
                 //TODO: ManualResetEvent _isAcceptMessagesFinished.Set() in Node
                 _module.Client.HasGotAllMessagesBack.Set();
             }
@@ -89,7 +99,7 @@ namespace DS_Network.Sync.Ricart
                 return true;
             if (requestLamportClock > ownLamportClock)
                 return false;
-            return remoteId < _localId;
+            return remoteId < _module.LocalId;
         }
     }
 }
