@@ -273,7 +273,7 @@ namespace DS_Network.Network
         /// </summary>
         private void ProcessResourceFromMasterNode()
         {
-            _syncAlgorithm.SendSyncRequestToAllHosts(_proxy, GetHostListWithoutMaster());
+            _syncAlgorithm.SendSyncRequestToAllHosts(GetHostListWithoutMaster());
 
             //initialize client to communicate with master node
             var readResFromMn = ReadFromMasterNode();

@@ -142,9 +142,14 @@ namespace DS_Network.Network
             //_module.AdjustLastRequestTsToNow();
         }
 
-        public bool GetSyncRequest(int timestamp, long id)
+        public void GetSyncRequest(int timestamp, long id, string ipAndPort)
         {
-            return _syncAlgorithmServer.GetSyncRequest(timestamp, id);
+            _syncAlgorithmServer.GetSyncRequest(timestamp, id, ipAndPort);
+        }
+
+        public void GetAcceptResponse(string fromIpAndPort)
+        {
+            _syncAlgorithmServer.GetAcceptResponse(fromIpAndPort);
         }
     }
 }

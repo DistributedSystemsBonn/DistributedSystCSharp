@@ -9,6 +9,9 @@ namespace DS_Network.Sync
         /// HANDLE
         /// </summary>
         [XmlRpcMethod("Host.getSyncRequest")]
-        bool GetSyncRequest(int timestamp, long id);
+        void GetSyncRequest(int timestamp, long id, string ipAndPort);
+
+        [XmlRpcMethod("Host.getAcceptResponse")]
+        void GetAcceptResponse(string fromIpAndPort);
     }
 }

@@ -39,7 +39,7 @@ namespace UnitTests
                 var electAlg = new Bully();
                 var ipAddress = NetworkHelper.FindIp().ToString();
                 var nodeInfo = new NodeInfo(ipAddress, port);
-                var syncAlgorithm = new RicartSyncAlgorithm(nodeInfo.Id);
+                var syncAlgorithm = new RicartSyncAlgorithm(nodeInfo, mockProxy);
 
                 var client = new Node(nodeInfo, mockProxy, electAlg, syncAlgorithm.Client, port); //client
                 var server = new Server(port, syncAlgorithm.Server, client);
@@ -54,7 +54,7 @@ namespace UnitTests
             var electAlg2 = new Bully();
             var ipAddress2 = "255.255.255.255";
             var nodeInfo2 = new NodeInfo(ipAddress2, port2);
-            var syncAlgorithm2 = new RicartSyncAlgorithm(nodeInfo2.Id);
+            var syncAlgorithm2 = new RicartSyncAlgorithm(nodeInfo2, mockProxy);
             var masterclient = new Node(nodeInfo2, mockProxy, electAlg2, syncAlgorithm2.Client, port2);
             MasterHost = new Host(masterclient,
                 new Server(port2, syncAlgorithm2.Server, masterclient));

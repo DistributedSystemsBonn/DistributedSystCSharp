@@ -22,9 +22,19 @@ namespace DS_Network.Helpers
             return "http://" + ip + ":" + port + "/";
         }
 
+        public static string FormUrl(string ipAndPort)
+        {
+            return "http://" + ipAndPort + "/";
+        }
+
         public static string FormXmlRpcUrl(string ip, int port)
         {
             return FormUrl(ip, port) + "xmlrpc";
+        }
+
+        public static string FormXmlRpcUrl(string ipAndPort)
+        {
+            return FormUrl(ipAndPort) + "xmlrpc";
         }
 
         public static IPAddress FindIp()

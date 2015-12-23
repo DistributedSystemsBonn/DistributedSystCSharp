@@ -5,5 +5,7 @@
         public int Time { get; set; }
         public long Id { get; set; }
         public long CallerId { get; set; }
+
+        public string ipAndPort { get; set; }
     }
 }

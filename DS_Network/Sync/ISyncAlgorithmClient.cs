@@ -8,7 +8,7 @@ namespace DS_Network.Sync
         /// <summary>
         /// Send request
         /// </summary>
-        void SendSyncRequestToAllHosts(IConnectionProxy proxy, List<NodeInfo> toSendHosts);
+        void SendSyncRequestToAllHosts(List<NodeInfo> toSendHosts);
 
         /// <summary>
         /// Access critical point

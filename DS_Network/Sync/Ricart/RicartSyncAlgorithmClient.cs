@@ -10,60 +10,65 @@ namespace DS_Network.Sync.Ricart
     public class RicartSyncAlgorithmClient : ISyncAlgorithmClient
     {
         private RicartSyncAlgorithm _module;
-        //public ManualResetEvent _hasGotAllMessagesBack = new ManualResetEvent(false);
+        public ManualResetEvent HasGotAllMessagesBack = new ManualResetEvent(false);
 
         public RicartSyncAlgorithmClient(RicartSyncAlgorithm module)
         {
             _module = module;
         }
 
-        public void SendSyncRequestToAllHosts(IConnectionProxy proxy, List<NodeInfo> toSendHosts)
+        public void SendSyncRequestToAllHosts(List<NodeInfo> toSendHosts)
         {
             _module.State = AccessState.Requested;
 
-            var logicClockTs = _module.LamportClock;
+            var logicClockTs = _module.IncrementLamportClock();
             //var timestamp = _module.IncrementClock();
             LogHelper.WriteStatus("Client: Current timestamp: " + logicClockTs);
             _module.IsInterested = true;
 
-            var sendTasks = new List<Task>();
+            //var sendTasks = new List<Task>();
+            var newThreads = new List<Thread>();
 
             foreach (var host in toSendHosts)
             {
                 var hostId = host.Id;
 
-                proxy.Url = host.GetFullUrl();
+                _module.Proxy.Url = host.GetFullUrl();
                 LogHelper.WriteStatus("Client: Send request to: " + hostId);
-                sendTasks.Add(Task.Factory.StartNew(() => SendSyncMsg(proxy, logicClockTs, hostId)));
+                _module.AcceptList.Add(host.GetIpAndPort());
+                newThreads.Add(new Thread(() => _module.Proxy.GetSyncRequest(logicClockTs, hostId, _module.LocalNodeInfo.GetIpAndPort())));
+                //newTask.Start();
+                //sendTasks.Add(Task.Factory.StartNew(() => _module.Proxy.GetSyncRequest(logicClockTs, hostId)));
             }
-            Task.WaitAll(sendTasks.ToArray());
 
-            LogHelper.WriteStatus("Client: Changed status to use resource");
+            foreach (var newThread in newThreads)
+            {
+                newThread.Start();
+            }
+            //wait until receive all messages. .Set() method is called in RicartSyncAlgServer
+            HasGotAllMessagesBack.WaitOne();
+
+            //Task.WaitAll(sendTasks.ToArray());
+
+            LogHelper.WriteStatus("Client: Received all ACCEPT MESSAGES AT: " + _module.LocalId);
             _module.State = AccessState.Held;
         }
 
-        public void SendSyncMsg(IConnectionProxy proxy, int timestamp, long id)
-        {
-            if (proxy.GetSyncRequest(timestamp, id))
-            {
-                //_module.AdjustLastRequestTsToNow();
-            }
-        }
-
-        public void Release(/*IConnectionProxy proxy */)
+        public void Release()
         {
             _module.State = AccessState.Released;
             _module.IsInterested = false;
-            //foreach (var request in _module.Queue)
-            //{
-            //    //TODO: init url correctly
-            //    proxy.Url = NetworkHelper.FormXmlRpcUrl(request.Id);
-            //}
+
+            foreach (var request in _module.Queue)
+            {
+                //TODO: init url correctly
+                _module.Proxy.Url = NetworkHelper.FormXmlRpcUrl(request.ipAndPort);
+                _module.Proxy.GetAcceptResponse(_module.LocalNodeInfo.GetIpAndPort());
+            }
+
+            _module.Queue.Clear();
 
             LogHelper.WriteStatus("Client: Released resource");
-            //_module.AdjustLastRequestTsToNow();
         }
-
-        
     }
 }

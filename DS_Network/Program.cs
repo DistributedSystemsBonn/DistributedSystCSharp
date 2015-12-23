@@ -19,7 +19,7 @@ namespace DS_Network
             var electAlg = new Bully();
             var ipAddress = NetworkHelper.FindIp().ToString();
             var nodeInfo = new NodeInfo(ipAddress, port);
-            var syncAlgorithm = new RicartSyncAlgorithm(nodeInfo.Id);
+            var syncAlgorithm = new RicartSyncAlgorithm(nodeInfo, proxy);
 
             var client = new Node(nodeInfo, proxy, electAlg, syncAlgorithm.Client, port); //client
             var server = new Server(port, syncAlgorithm.Server, client);

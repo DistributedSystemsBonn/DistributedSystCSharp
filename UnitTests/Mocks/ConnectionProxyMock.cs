@@ -245,10 +245,16 @@ namespace UnitTests.Mocks
             host.Server.updateResource(updateStr, ipAndPort);
         }
 
-        public bool GetSyncRequest(int timestamp, long id)
+        public void GetSyncRequest(int timestamp, long id, string ipAndPort)
         {
             var host = _hostLookupWithUrls[_curUrl];
-            return host.Server.GetSyncRequest(timestamp, id);
+            host.Server.GetSyncRequest(timestamp, id, ipAndPort);
+        }
+
+        public void GetAcceptResponse(string fromIpAndPort)
+        {
+            var host = _hostLookupWithUrls[_curUrl];
+            host.Server.GetAcceptResponse(fromIpAndPort);
         }
     }
 }
