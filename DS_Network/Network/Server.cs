@@ -15,8 +15,8 @@ namespace DS_Network.Network
     public class Server : MarshalByRefObject, IConnectionService, ISyncAlgorithmServer
     {
         private int _port;
-        private Node _client;
-        private ISyncAlgorithmServer _syncAlgorithmServer;
+        private static Node _client;
+        private static ISyncAlgorithmServer _syncAlgorithmServer;
 
         public Server()
         {

@@ -22,12 +22,12 @@ namespace DS_Network.Sync.Ricart
 
         public void SendSyncRequestToAllHosts(List<NodeInfo> toSendHosts)
         {
-            lock (Shared.SharedLock)
-            {
+            //lock (Shared.SharedLock)
+            //{
+            HasGotAllMessagesBack.Reset();
                 _module.State = AccessState.Requested;
 
                 LogHelper.WriteStatus("Client: " + _module.LocalId + ": Current timestamp: " + _module.Clock.Value);
-
                 LogHelper.WriteStatus("Client: " + _module.LocalId + ": Capacity: " + toSendHosts.Count);
                 _module.IsInterested = true;
 
@@ -39,7 +39,7 @@ namespace DS_Network.Sync.Ricart
                     newThread.Start();
                     Thread.Sleep(5);
                 }
-            }
+            //}
             
 
             //wait until receive all messages. .Set() method is called in RicartSyncAlgServer
@@ -51,8 +51,8 @@ namespace DS_Network.Sync.Ricart
 
         public void SendSyncMsg(IConnectionProxy proxy, NodeInfo toNode)
         {
-            lock (Shared.SharedLock)
-            {
+            //lock (Shared.SharedLock)
+            //{
                 var logicClockTs = _module.Clock.SendEventHandle();
 
                 _module.AddToAcceptList(toNode.GetIpAndPort());
@@ -60,7 +60,7 @@ namespace DS_Network.Sync.Ricart
                 proxy.Url = urlToSend;
                 Debug.WriteLine("CLIENT: SEND REQ FROM: " + _module.LocalNodeInfo.GetIpAndPort() + " TO: " + _module.Proxy.Url);
                 _module.Proxy.GetSyncRequest(logicClockTs, _module.LocalNodeInfo.Id, _module.LocalNodeInfo.GetIpAndPort());
-            }
+            //}
         }
 
         public void Release()

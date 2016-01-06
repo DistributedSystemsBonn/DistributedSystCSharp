@@ -219,12 +219,12 @@ namespace DS_Network.Network
 
             _electionAlgorithm.finishElection();
 
-            //if (isStartNeeded)
-            //{
-            //    //START ALGORITHM. Because we know our master node. 
-            //    var startAlgorithm = new Thread(() => StartAlgorithm());
-            //    startAlgorithm.Start();
-            //}
+            if (isStartNeeded)
+            {
+                //START ALGORITHM. Because we know our master node. 
+                var startAlgorithm = new Thread(() => StartAlgorithm());
+                startAlgorithm.Start();
+            }
         }
 
         private string GetRandomFruit()
@@ -240,7 +240,7 @@ namespace DS_Network.Network
             var rnd = new Random();
             //var hostList = _hostLookup.Values.ToList();
             int count = 0;
-
+            _startTime = DateTime.Now;
             if (IsMasterNode())
             {
                 return;

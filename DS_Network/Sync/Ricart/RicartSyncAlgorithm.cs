@@ -54,23 +54,23 @@ namespace DS_Network.Sync.Ricart
 
         public void AddToAcceptList(string ipAndPort)
         {
-            lock (Shared.SharedLock)
-            {
+            //lock (Shared.SharedLock)
+            //{
                 _acceptList.Add(ipAndPort);
-            }
+            //}
         }
 
         public void RemoveFromAcceptList(string ipAndPort)
         {
-            lock (Shared.SharedLock)
-            {
+            //lock (Shared.SharedLock)
+            //{
                 Debug.WriteLine("SERVER: " + LocalId + "REMOVE IP: " + ipAndPort);
 
                 if (!_acceptList.Remove(ipAndPort))
                 {
                     throw new ArgumentException("Element in accept list doesnt exist: " + ipAndPort);
                 }
-            }
+            //}
         }
 
         public AccessState State { get; set; }
@@ -89,24 +89,24 @@ namespace DS_Network.Sync.Ricart
 
         public void AddRequest(DataRequest request)
         {
-            lock (Shared.SharedLock)
-            {
+            //lock (Shared.SharedLock)
+            //{
                 LogHelper.WriteStatus("Server: Add request to queue: " + request.CallerId + " with timestamp: " +
                                           request.Time);
                 _queue.Add(request);
                 _queue = _queue.OrderBy(x => x.Time).ToList();
                 //_queue = _queue.OrderBy(x => x.Time).ThenBy(x => x.CallerId).ToList();
-            }
+            //}
         }
 
         public void PopRequest(DataRequest request)
         {
-            lock (Shared.SharedLock)
-            {
+            //lock (Shared.SharedLock)
+            //{
                 _queue.Remove(request);
                 LogHelper.WriteStatus("Server: Remove request from queue: " + request.CallerId + " with timestamp: " +
                                           request.Time);
-            }
+            //}
         }
 
         public int GetQueueCount()
