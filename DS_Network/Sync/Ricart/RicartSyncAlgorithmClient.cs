@@ -65,6 +65,8 @@ namespace DS_Network.Sync.Ricart
 
         public void Release()
         {
+            _module.PrintQueue();
+
             _module.State = AccessState.Released;
             _module.IsInterested = false;
 

@@ -27,6 +27,7 @@ namespace DS_Network.Sync.Ricart
         {
             //lock (Shared.SharedLock)
             //{
+            _module.PrintQueue();
                 Debug.WriteLine("SERVER: RECV " + _module.LocalNodeInfo.GetIpAndPort() + " FROM: " + ipAndPort + " TIME: " + timestamp);
                 //SendAcceptResponse(ipAndPort);
                 // create request object
@@ -64,6 +65,7 @@ namespace DS_Network.Sync.Ricart
                 //}
                 _module.Clock.ReceiveEventHandle(timestamp);
            //}
+                _module.PrintQueue();
         }
 
         public void SendAcceptResponse(string ipAndPort)

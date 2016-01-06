@@ -114,6 +114,17 @@ namespace DS_Network.Sync.Ricart
             return _queue.Count;
         }
 
+        public void PrintQueue()
+        {
+            Console.WriteLine("Queue:: ");
+            foreach (var q in _queue) 
+            {
+                Console.Write(q.ipAndPort);
+                Console.Write(", ");
+            }
+            Console.WriteLine("");
+        }
+
         #endregion Request _queue
 
         public RicartSyncAlgorithmClient Client { get; private set; }

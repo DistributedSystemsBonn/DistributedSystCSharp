@@ -263,6 +263,7 @@ namespace DS_Network.Network
                 }
             } while (true);
 
+            Thread.Sleep(5000);
             var finalString = ReadFromMasterNode();
             _syncAlgorithm.Release();
             Console.WriteLine("Final string: " + finalString);
@@ -334,7 +335,7 @@ namespace DS_Network.Network
         private List<NodeInfo> GetHostListWithoutMaster()
         {
             var listCopy = _hostLookup.Values.ToList();
-            listCopy.Add(_nodeInfo);
+            //listCopy.Add(_nodeInfo);
             listCopy.RemoveAll(x => x.GetIpAndPort() == MasterNode.GetIpAndPort());
             return listCopy;
         } 

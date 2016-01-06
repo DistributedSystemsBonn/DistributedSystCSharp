@@ -42,6 +42,11 @@ namespace DS_Network.Clock
 
         public bool CompareTime(int requestLamportClock, long remoteId)
         {
+            //LogHelper.WriteStatus()
+            if (remoteId == _localId)
+            {
+                LogHelper.WriteStatus("*** remoteID and localID is same:: " + remoteId.ToString());
+            }
             if (requestLamportClock < Value)
                 return true;
             if (requestLamportClock > Value)
