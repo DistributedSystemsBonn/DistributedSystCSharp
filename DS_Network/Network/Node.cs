@@ -263,7 +263,7 @@ namespace DS_Network.Network
                     break;
                 }
             } while (true);
-
+            Thread.Sleep(5000);
             var finalString = ReadFromMasterNode();
             _syncAlgorithm.Release();
             Console.WriteLine("Final string: " + finalString);
