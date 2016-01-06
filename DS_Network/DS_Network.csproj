@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Clock\ExtendedLamportClock.cs" />
     <Compile Include="Election\Bully.cs" />
     <Compile Include="Election\IElectionAlgorithm.cs" />
     <Compile Include="Helpers\LogHelper.cs" />

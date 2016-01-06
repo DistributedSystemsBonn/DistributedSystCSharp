@@ -147,9 +147,9 @@ namespace DS_Network.Network
             _syncAlgorithmServer.GetSyncRequest(timestamp, id, ipAndPort);
         }
 
-        public void GetAcceptResponse(string fromIpAndPort)
+        public void GetAcceptResponse(string fromIpAndPort, int timestamp)
         {
-            _syncAlgorithmServer.GetAcceptResponse(fromIpAndPort);
+            _syncAlgorithmServer.GetAcceptResponse(fromIpAndPort, timestamp);
         }
     }
 }

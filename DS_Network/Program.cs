@@ -23,7 +23,7 @@ namespace DS_Network
 
             var client = new Node(nodeInfo, proxy, electAlg, syncAlgorithm.Client, port); //client
             var server = new Server(port, syncAlgorithm.Server, client);
-            server.Run();
+            var host = new Host(client, server);
 
             Console.WriteLine("Client IP: " + client.NodeInfo.GetIpAndPort());
             Console.WriteLine("Client ID: " + client.NodeInfo.Id);

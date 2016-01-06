@@ -22,3 +22,4 @@ C:\Users\shinh_000\Documents\GitHub\DistributedSystCSharp\DS_Network\bin\Debug\D
 C:\Users\shinh_000\Documents\GitHub\DistributedSystCSharp\DS_Network\bin\Debug\CookComputing.XmlRpcV2.dll
 C:\Users\shinh_000\Documents\GitHub\DistributedSystCSharp\DS_Network\obj\Debug\DS_Network.exe
 C:\Users\shinh_000\Documents\GitHub\DistributedSystCSharp\DS_Network\obj\Debug\DS_Network.pdb
+C:\work\DistributedSystCSharp\DS_Network\obj\Debug\DS_Network.csprojResolveAssemblyReference.cache

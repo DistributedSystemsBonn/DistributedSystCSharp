@@ -251,10 +251,10 @@ namespace UnitTests.Mocks
             host.Server.GetSyncRequest(timestamp, id, ipAndPort);
         }
 
-        public void GetAcceptResponse(string fromIpAndPort)
+        public void GetAcceptResponse(string fromIpAndPort, int timestamp)
         {
             var host = _hostLookupWithUrls[_curUrl];
-            host.Server.GetAcceptResponse(fromIpAndPort);
+            host.Server.GetAcceptResponse(fromIpAndPort, timestamp);
         }
     }
 }
