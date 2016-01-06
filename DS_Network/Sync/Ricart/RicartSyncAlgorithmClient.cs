@@ -68,5 +68,7 @@ namespace DS_Network.Sync.Ricart
 
             LogHelper.WriteStatus("Client: Released resource at " + _module.LocalNodeInfo.GetIpAndPort());
         }
+
+        public void SendSyncRequestToMaster(NodeInfo masterNode) { }
     }
 }

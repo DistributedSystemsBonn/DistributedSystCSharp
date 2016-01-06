@@ -10,6 +10,8 @@ namespace DS_Network.Sync
         /// </summary>
         void SendSyncRequestToAllHosts(List<NodeInfo> toSendHosts);
 
+        void SendSyncRequestToMaster(NodeInfo masterNode);
+
         /// <summary>
         /// Access critical point
         /// </summary>

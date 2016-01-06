@@ -256,5 +256,11 @@ namespace UnitTests.Mocks
             var host = _hostLookupWithUrls[_curUrl];
             host.Server.GetAcceptResponse(fromIpAndPort);
         }
+
+        public void GetReleasedMsg(string fromIpAndPort)
+        {
+            var host = _hostLookupWithUrls[_curUrl];
+            host.Server.GetReleasedMsg(fromIpAndPort);
+        }
     }
 }

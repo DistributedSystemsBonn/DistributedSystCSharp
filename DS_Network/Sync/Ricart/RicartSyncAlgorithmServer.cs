@@ -99,5 +99,7 @@ namespace DS_Network.Sync.Ricart
                 return false;
             return remoteId < _module.LocalId;
         }
+
+        public void GetReleasedMsg(string fromIpAndPort) { }
     }
 }

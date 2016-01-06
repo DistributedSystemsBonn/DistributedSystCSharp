@@ -193,7 +193,7 @@ namespace DS_Network.Network
                 return;
             }
 
-            // TODO : master node reset
+            // master node reset
             _masterNode = null;
 
             _electionAlgorithm.startBullyElection(_nodeInfo, _hostLookup, _proxy);
@@ -219,12 +219,12 @@ namespace DS_Network.Network
 
             _electionAlgorithm.finishElection();
 
-            //if (isStartNeeded)
-            //{
-            //    //START ALGORITHM. Because we know our master node. 
-            //    var startAlgorithm = new Thread(() => StartAlgorithm());
-            //    startAlgorithm.Start();
-            //}
+            if (isStartNeeded)
+            {
+                //START ALGORITHM. Because we know our master node. 
+                var startAlgorithm = new Thread(() => StartAlgorithm());
+                startAlgorithm.Start();
+            }
         }
 
         private string GetRandomFruit()
@@ -240,6 +240,7 @@ namespace DS_Network.Network
             var rnd = new Random();
             //var hostList = _hostLookup.Values.ToList();
             int count = 0;
+            _startTime = DateTime.Now;
 
             if (IsMasterNode())
             {
@@ -254,7 +255,7 @@ namespace DS_Network.Network
                 WaitRandomAmountTime(rnd);
                 
                 ProcessResourceFromMasterNode();
-
+                
                 var executeTime = DateTime.Now;
                 if (TimeSpan.Compare(executeTime - _startTime, _maxDuration) >= 0)
                 {
@@ -273,7 +274,8 @@ namespace DS_Network.Network
         /// </summary>
         private void ProcessResourceFromMasterNode()
         {
-            _syncAlgorithm.SendSyncRequestToAllHosts(GetHostListWithoutMaster());
+            _syncAlgorithm.SendSyncRequestToMaster(MasterNode);
+            //_syncAlgorithm.SendSyncRequestToAllHosts(GetHostListWithoutMaster());
 
             //initialize client to communicate with master node
             var readResFromMn = ReadFromMasterNode();
