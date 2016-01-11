@@ -13,5 +13,8 @@ namespace DS_Network.Sync
 
         [XmlRpcMethod("Host.getAcceptResponse")]
         void GetAcceptResponse(string fromIpAndPort, int timestamp);
+
+        [XmlRpcMethod("Host.getReleasedMsg")]
+        void GetReleasedMsg(string fromIpAndPort);
     }
 }

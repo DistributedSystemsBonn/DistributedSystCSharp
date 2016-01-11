@@ -151,5 +151,10 @@ namespace DS_Network.Network
         {
             _syncAlgorithmServer.GetAcceptResponse(fromIpAndPort, timestamp);
         }
+
+        public void GetReleasedMsg(string fromIpAndPort) 
+        {
+            _syncAlgorithmServer.GetReleasedMsg(fromIpAndPort);
+        }
     }
 }

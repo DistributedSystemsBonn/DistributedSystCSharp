@@ -7,6 +7,7 @@ using DS_Network.Election;
 using DS_Network.Helpers;
 using DS_Network.Network;
 using DS_Network.Sync.Ricart;
+using DS_Network.Sync.Centralized;
 
 namespace DS_Network
 {
@@ -19,7 +20,8 @@ namespace DS_Network
             var electAlg = new Bully();
             var ipAddress = NetworkHelper.FindIp().ToString();
             var nodeInfo = new NodeInfo(ipAddress, port);
-            var syncAlgorithm = new RicartSyncAlgorithm(nodeInfo, proxy);
+            //var syncAlgorithm = new RicartSyncAlgorithm(nodeInfo, proxy);
+            var syncAlgorithm = new CentralizedSyncAlgorithm(nodeInfo, proxy);
 
             var client = new Node(nodeInfo, proxy, electAlg, syncAlgorithm.Client, port); //client
             var server = new Server(port, syncAlgorithm.Server, client);

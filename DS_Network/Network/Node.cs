@@ -193,7 +193,7 @@ namespace DS_Network.Network
                 return;
             }
 
-            // TODO : master node reset
+            // master node reset
             _masterNode = null;
 
             _electionAlgorithm.startBullyElection(_nodeInfo, _hostLookup, _proxy);
@@ -241,6 +241,7 @@ namespace DS_Network.Network
             //var hostList = _hostLookup.Values.ToList();
             int count = 0;
             _startTime = DateTime.Now;
+
             if (IsMasterNode())
             {
                 return;
@@ -275,6 +276,7 @@ namespace DS_Network.Network
         private void ProcessResourceFromMasterNode()
         {
             _syncAlgorithm.SendSyncRequestToAllHosts(GetHostListWithoutMaster());
+            //_syncAlgorithm.SendSyncRequestToMaster(MasterNode); // for CentralizedME
 
             //initialize client to communicate with master node
             var readResFromMn = ReadFromMasterNode();
@@ -336,6 +338,7 @@ namespace DS_Network.Network
         {
             var listCopy = _hostLookup.Values.ToList();
             //listCopy.Add(_nodeInfo);
+
             listCopy.RemoveAll(x => x.GetIpAndPort() == MasterNode.GetIpAndPort());
             return listCopy;
         } 
