@@ -32,7 +32,7 @@ namespace DS_Network.Network
 
         private HashSet<string> _appendedStringSet = new HashSet<string>();
         private DateTime _startTime;
-        private TimeSpan _maxDuration = new TimeSpan(0, 0, 10);
+        private TimeSpan _maxDuration = new TimeSpan(0, 0, 20);
 
         private ManualResetEvent _isElectionFinished = new ManualResetEvent(false);
         private ManualResetEvent _isProcessFinished = new ManualResetEvent(false);
@@ -367,23 +367,24 @@ namespace DS_Network.Network
             }
 
             // TEST:
-            Thread.Sleep(2000);
+            //Thread.Sleep(2000);
 
-
-            //initialize client to communicate with master node
-            var readResFromMn = ReadFromMasterNode();
-
-            //generate string
-            var randomStr = GetRandomFruit();
-            LogHelper.WriteStatus("Generated string: " + randomStr);
-
-            //append string
-            var appendedString = String.Concat(readResFromMn, randomStr);
-            //add appended string to list
-            _appendedStringSet.Add(appendedString);
-            LogHelper.WriteStatus("Result of appended string " + appendedString);
-
-            UpdateMasterNodeResource(appendedString);
+            // process only in limited execution time.
+            var executeTime = DateTime.Now;
+            if (TimeSpan.Compare(executeTime - _startTime, _maxDuration) < 0)
+            {
+                //initialize client to communicate with master node
+                var readResFromMn = ReadFromMasterNode();
+                //generate string
+                var randomStr = GetRandomFruit();
+                LogHelper.WriteStatus("Generated string: " + randomStr);
+                //append string
+                var appendedString = String.Concat(readResFromMn, randomStr);
+                //add appended string to list
+                _appendedStringSet.Add(appendedString);
+                LogHelper.WriteStatus("Result of appended string " + appendedString);
+                UpdateMasterNodeResource(appendedString);   
+            }
 
             if (isRicartAlgorithm)
             {
