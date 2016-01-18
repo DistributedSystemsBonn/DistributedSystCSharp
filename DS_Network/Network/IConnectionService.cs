@@ -5,22 +5,19 @@ namespace DS_Network.Network
 {
     public interface IConnectionService
     {
-        [XmlRpcMethod("Host.join")]
-        bool join(string ipAndPort);
-
-        //void AddNewComputer(string ip);
-
-        [XmlRpcMethod("Host.signOff")]
-        bool signOff(String ipAndPort);
-
-        [XmlRpcMethod("Host.start")]
-        bool start();
-
         [XmlRpcMethod("Host.getHosts")]
-        Object[] getHosts(String ipAndPortCallee);
+        Object[] GetHosts(string ipAndPortCallee);
 
         [XmlRpcMethod("Host.addNewHost")]
-        void addNewHost(String ipAndPort);
+        void AddNewHost(string ipAndPort);
+
+        [XmlRpcMethod("Host.signOff")]
+        bool SignOff(string ipAndPort);
+        
+
+        [XmlRpcMethod("Host.getStartMsg")]
+        void GetStartMsg(bool isRicartAlgorithm);
+
 
         [XmlRpcMethod("Host.receiveElectionMsg")]
         bool ReceiveElectionMsg(string id);
@@ -28,11 +25,13 @@ namespace DS_Network.Network
         [XmlRpcMethod("Host.setMasterNode")]
         void SetMasterNode(string ipAndPort);
 
+
+
         [XmlRpcMethod("Host.readResource")]
-        string readResource(string ipAndPort);
+        string ReadResource(string ipAndPort);
 
         [XmlRpcMethod("Host.updateResource")]
-        void updateResource(string updateStr, string ipAndPort);
+        void UpdateResource(string updateStr, string ipAndPort);
     }
 }
 

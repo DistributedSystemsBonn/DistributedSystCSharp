@@ -1,14 +1,14 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading;
 using DS_Network.Helpers;
+using DS_Network.Network;
 
 namespace DS_Network.Sync.Ricart
 {
     /// <summary>
     /// Server part of ricart algorithm
     /// </summary>
-    public class RicartSyncAlgorithmServer : ISyncAlgorithmServer
+    public class RicartSyncAlgorithmServer : IRicartSyncAlgorithmServer
     {
         private RicartSyncAlgorithm _module;
         
@@ -23,86 +23,87 @@ namespace DS_Network.Sync.Ricart
         /// <param name="timestamp"></param>
         /// <param name="id"></param>
         /// <param name="ipAndPort">Ip and port of host who calls this method</param>
-        public void GetSyncRequest(int timestamp, long id, string ipAndPort)
+        public void GetSyncRequest_RA(int timestamp, long id, string ipAndPort)
         {
-            //lock (Shared.SharedLock)
-            //{
-            _module.PrintQueue();
-                Debug.WriteLine("SERVER: RECV " + _module.LocalNodeInfo.GetIpAndPort() + " FROM: " + ipAndPort + " TIME: " + timestamp);
-                //SendAcceptResponse(ipAndPort);
-                // create request object
-                var request = new DataRequest()
-                {
-                    Time = timestamp,
-                    Id = _module.LocalId,
-                    CallerId = id,
-                    ipAndPort = ipAndPort
-                };
+            LogHelper.WriteStatus("SERVER: RECV " + _module.LocalNodeInfo.GetIpAndPort() + " FROM: " + ipAndPort + " TIME: " + timestamp);
+            // create request object
+            var request = new DataRequest()
+            {
+                Time = timestamp,
+                Id = _module.LocalId,
+                CallerId = id,
+                IpAndPort = ipAndPort
+            };
 
-                if (_module.State != AccessState.Held && !_module.IsInterested)
-                {
+            if (_module.State != AccessState.Held && !_module.IsInterested)
+            {
+                //Send accept msg to callee
+                SendAcceptResponse(ipAndPort);
+            }
+            else if (_module.State == AccessState.Held)
+            {
+                _module.AddRequest(request);
+            }
+            else if (_module.IsInterested)
+            {
+                if (_module.Clock.CompareTime(timestamp, id))
+                {   // request timestamp is smaller than this node's timestamp.
+                    //Send accept msg to callee
                     SendAcceptResponse(ipAndPort);
                 }
-                else if (_module.State == AccessState.Held)
+                else
                 {
                     _module.AddRequest(request);
                 }
-                else if (_module.IsInterested)
-                {
-                    if (_module.Clock.CompareTime(timestamp, id))
-                    {
-                        //Send accept msg to callee
-                        SendAcceptResponse(ipAndPort);
-                    }
-                    else
-                    {
-                        _module.AddRequest(request);
-                    }
-                }
-                //else
-                //{
-                //    SendAcceptResponse(ipAndPort);
-                //}
-                _module.Clock.ReceiveEventHandle(timestamp);
-           //}
-                _module.PrintQueue();
+            }
+            _module.Clock.ReceiveEventHandle(timestamp);
         }
-
+        /// <summary>
+        /// send accept response to a host
+        /// </summary>
+        /// <param name="ipAndPort"></param>
         public void SendAcceptResponse(string ipAndPort)
         {
-            //lock (Shared.SharedLock)
-            //{
-                //Send event in clock
-                _module.Clock.SendEventHandle();
-                var myIp = _module.LocalNodeInfo.GetIpAndPort();
-                Debug.WriteLine("SERVER: " + myIp + "SEND OK TO: " + ipAndPort);
+            //Send event in clock
+            _module.Clock.SendEventHandle();
+            var myIp = _module.LocalNodeInfo.GetIpAndPort();
+            LogHelper.WriteStatus("SERVER: " + myIp + " SEND OK TO: " + ipAndPort);
+            //Debug.WriteLine("SERVER: " + myIp + "SEND OK TO: " + ipAndPort);
+
+            lock (Shared.SendLock)
+            {
                 _module.Proxy.Url = NetworkHelper.FormXmlRpcUrl(ipAndPort);
                 //send accept response with parameter which describes our host
-                var newSendThread = new Thread(() => _module.Proxy.GetAcceptResponse(_module.LocalNodeInfo.GetIpAndPort(), _module.Clock.Value));
-                newSendThread.Start();
-                //Thread.Sleep(5);
-            //}
+                _module.Proxy.GetAcceptResponse_RA(_module.LocalNodeInfo.GetIpAndPort(), _module.Clock.Value);
+                //var newSendThread =
+                //    new Thread(
+                //        () =>
+                //            _module.Proxy.GetAcceptResponse_RA(_module.LocalNodeInfo.GetIpAndPort(), _module.Clock.Value));
+                //newSendThread.Start();
+            }
         }
-
-        public void GetAcceptResponse(string fromIpAndPort, int timestamp)
+        /// <summary>
+        /// get accept response from a host
+        /// </summary>
+        /// <param name="fromIpAndPort"></param>
+        /// <param name="timestamp"></param>
+        public void GetAcceptResponse_RA(string fromIpAndPort, int timestamp)
         {
-            //lock (Shared.SharedLock)
-            //{
-                var myIp = _module.LocalNodeInfo.GetIpAndPort();
-                
-                _module.RemoveFromAcceptList(fromIpAndPort);
+            var myIp = _module.LocalNodeInfo.GetIpAndPort();
+            
+            _module.RemoveFromAcceptList(fromIpAndPort);
+            
+            //check if all accept messages received. if yes, start accessing to resource
+            if (_module.IsGotAllOk())
+            {
+                LogHelper.WriteStatus("RESET. GOT ALL AT: " + myIp);
+                //Debug.WriteLine("RESET. GOT ALL AT: " + myIp);
+                //ManualResetEvent _isAcceptMessagesFinished.Set() in Node
+                _module.Client.HasGotAllMessagesBack.Set();
+            }
 
-                //check if all accept messages received. if yes, start accessing to resource
-                if (_module.IsGotAllOk())
-                {
-                    Debug.WriteLine("RESET. GOT ALL AT: " + myIp);
-                    //ManualResetEvent _isAcceptMessagesFinished.Set() in Node
-                    _module.Client.HasGotAllMessagesBack.Set();
-                }
-
-                //Clock: recv handle
-                _module.Clock.ReceiveEventHandle(timestamp);
-            //}
+            //Clock: recv handle
+            _module.Clock.ReceiveEventHandle(timestamp);
         }
     }
 }

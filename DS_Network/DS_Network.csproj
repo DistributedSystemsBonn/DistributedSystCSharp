@@ -66,11 +66,14 @@
     <Compile Include="Sync\Centralized\CentralizedSyncAlgorithmClient.cs" />
     <Compile Include="Sync\Centralized\CentralizedSyncAlgorithmServer.cs" />
     <Compile Include="Sync\DataRequest.cs" />
-    <Compile Include="Sync\ISyncAlgorithmClient.cs" />
-    <Compile Include="Sync\ISyncAlgorithmServer.cs" />
+    <Compile Include="Sync\IRicartSyncAlgorithmClient.cs" />
+    <Compile Include="Sync\IRicartSyncAlgorithmServer.cs" />
+    <Compile Include="Sync\ICentralizedSyncAlgorithmClient.cs" />
+    <Compile Include="Sync\ICentralizedSyncAlgorithmServer.cs" />
     <Compile Include="Sync\Ricart\RicartSyncAlgorithm.cs" />
     <Compile Include="Sync\Ricart\RicartSyncAlgorithmClient.cs" />
     <Compile Include="Sync\Ricart\RicartSyncAlgorithmServer.cs" />
+    <Compile Include="Sync\SyncAlgorithm.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

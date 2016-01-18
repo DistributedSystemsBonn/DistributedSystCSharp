@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using DS_Network.Helpers;
 using System.Threading;
@@ -9,28 +8,41 @@ using DS_Network.Sync;
 
 namespace DS_Network.Network
 {
+    public static class Shared
+    {
+        public static readonly object SharedLock = new object();
+        public static readonly object RecvLock = new object();
+        public static readonly object SendLock = new object();
+    }
+
     /// <summary>
     /// Client host
     /// </summary>
     public class Node
     {
         private Dictionary<String, NodeInfo> _hostLookup = new Dictionary<String, NodeInfo>();
-        private HashSet<string> _appendedStringSet = new HashSet<string>(); 
+        
         private IConnectionProxy _proxy;
         private NodeInfo _nodeInfo;
-        private DateTime _startTime;
-        private IElectionAlgorithm _electionAlgorithm;
         private NodeInfo _masterNode;
-        private static TimeSpan _maxDuration = new TimeSpan(0, 0, 20);
-        private AccessState _state = AccessState.Released;
-        private ISyncAlgorithmClient _syncAlgorithm;
+        
+        private IElectionAlgorithm _electionAlgorithm;
+        private IRicartSyncAlgorithmClient _ricartSyncAlgClient;
+        private ICentralizedSyncAlgorithmClient _centralizedSyncAlgClient;
 
-        public string Resource { get; set; }
+        private HashSet<string> _appendedStringSet = new HashSet<string>();
+        private DateTime _startTime;
+        private TimeSpan _maxDuration = new TimeSpan(0, 0, 10);
 
-        public NodeInfo MasterNode
-        {
-            get { return _masterNode; }
-        }
+        private ManualResetEvent _isElectionFinished = new ManualResetEvent(false);
+        private ManualResetEvent _isProcessFinished = new ManualResetEvent(false);
+
+        public string Resource { get; set; }    // Master Resource
+        private List<NodeInfo> hostlistWithoutMaster;
+        //public NodeInfo MasterNode
+        //{
+        //    get { return _masterNode; }
+        //}
 
         public Dictionary<String, NodeInfo> HostLookup
         {
@@ -48,14 +60,22 @@ namespace DS_Network.Network
             }
         }
 
-        public Node(NodeInfo nodeInfo, IConnectionProxy client, IElectionAlgorithm electionAlgorithm, ISyncAlgorithmClient syncAlgorithmClient, int port) //ServiceReference1.Service1Client client
+        /// <summary>
+        /// constructor
+        /// </summary>
+        public Node(NodeInfo nodeInfo, IConnectionProxy proxy, IElectionAlgorithm electionAlgorithm
+            , IRicartSyncAlgorithmClient ricartSyncAlgorithmClient, ICentralizedSyncAlgorithmClient centralizedSyncAlgorithmClient)
         {
-            _proxy = client;
+            _proxy = proxy;
             _nodeInfo = nodeInfo;
             _electionAlgorithm = electionAlgorithm;
-            _syncAlgorithm = syncAlgorithmClient;
+            _ricartSyncAlgClient = ricartSyncAlgorithmClient;
+            _centralizedSyncAlgClient = centralizedSyncAlgorithmClient;
         }
 
+        /// <summary>
+        /// command process - execute method for the command
+        /// </summary>
         public void ProcessCommand(string command)
         {
             var commandArr = StringHelper.GetCommandArray(command);
@@ -76,25 +96,39 @@ namespace DS_Network.Network
                 {
                     SignOff();
                 }
-                else if (commandName == "start")
-                {
-                    Start();
-                }
                 else if (commandName == "gethosts")
                 {
                     PrintHosts();
                 }
-                else if (commandName == "election")
+                //else if (commandName == "election")
+                //{
+                //    ElectMasterNode();
+                //}
+                else if (commandName == "start_ct") // centralized M.E.
                 {
-                    ElectMasterNode();
+                    _isProcessFinished.Reset();
+                    Start(false);
+                    _isProcessFinished.WaitOne();
+                }
+                else if (commandName == "start_ra") // ricart agrawala M.E.
+                {
+                    _isProcessFinished.Reset();
+                    Start(true);
+                    _isProcessFinished.WaitOne();
                 }
             }
             else
             {
                 throw new ArgumentException("Number of parameters shouldn't be more than 1 or command should be without parameter");
             }
+            //Thread.Sleep(10);
         }
 
+        #region Command: gethosts
+
+        /// <summary>
+        /// Command: gethosts
+        /// </summary>
         public void PrintHosts()
         {
             if (_hostLookup.Count == 0)
@@ -108,10 +142,18 @@ namespace DS_Network.Network
                 Console.WriteLine(host.GetFullUrl());
             }
         }
+        
+        #endregion
 
-        public void Join(String ipAndPort)
+        #region Command: join
+
+        /// <summary>
+        /// Command: Join
+        /// connect to other network
+        /// </summary>
+        public void Join(string ipAndPort)
         {
-            Console.WriteLine("Join operation with address " + ipAndPort);
+            Console.WriteLine("# Join operation with address " + ipAndPort);
             var toJoinInfo = new NodeInfo(ipAndPort);
             if (toJoinInfo.IsSameHost(_nodeInfo))
             {
@@ -120,28 +162,26 @@ namespace DS_Network.Network
 
             _proxy.Url = toJoinInfo.GetFullUrl();
 
-            //Receive list from receiver
-            var listsOfHosts = _proxy.getHosts(_nodeInfo.GetIpAndPort());
+            // Receive list from receiver
+            var listsOfHosts = _proxy.GetHosts(_nodeInfo.GetIpAndPort());
 
-            //Add list to dictionary
+            // Add list to dictionary and send the information of own node to all other hosts
             foreach (var host in listsOfHosts)
             {
                 var toSendHost = AddNewHost(host.ToString());
                 _proxy.Url = toSendHost.GetFullUrl();
-                _proxy.addNewHost(_nodeInfo.GetIpAndPort());
+                _proxy.AddNewHost(_nodeInfo.GetIpAndPort());
             }
 
-            //Add ipAndPort of receiver
+            // Add ipAndPort of receiver
             AddNewHost(ipAndPort);
 
-            Console.WriteLine(listsOfHosts.ToString());
+            Console.WriteLine("# Network connection success.");
         }
 
         /// <summary>
         /// Add new host to dictionary
         /// </summary>
-        /// <param name="ipAndPort"></param>
-        /// <returns></returns>
         public NodeInfo AddNewHost(string ipAndPort)
         {
             var nodeInfo = new NodeInfo(ipAndPort);
@@ -149,6 +189,9 @@ namespace DS_Network.Network
 
             return nodeInfo;
         }
+        #endregion
+
+        #region Command: signoff
 
         /// <summary>
         /// Sign off from network
@@ -162,16 +205,21 @@ namespace DS_Network.Network
             {
                 _proxy.Url = host.GetFullUrl();
                 //call rpc method to sign off
-                _proxy.signOff(myIp);
+                _proxy.SignOff(myIp);
             }
 
             _hostLookup.Clear();
+            LogHelper.WriteStatus("Sign off succeed.");
         }
 
+        #endregion
+
+        #region Command: start
+
         /// <summary>
-        /// 
+        /// make all machines to wait the end of election.
         /// </summary>
-        public void Start()
+        private void Start(bool isRicartAlgorithm)
         {
             if (_hostLookup.Count == 0)
             {
@@ -179,11 +227,29 @@ namespace DS_Network.Network
                 return;
             }
 
+            // 0. Send "Start" Message to All hosts and start StartProcess() thread
+            foreach (NodeInfo host in _hostLookup.Values)
+            {
+                _proxy.Url = host.GetFullUrl();
+                _proxy.GetStartMsg(isRicartAlgorithm);
+            }
+            var proc = new Thread(() => StartProcess(isRicartAlgorithm));
+            proc.Start();
+
+            Thread.Sleep(1000);
+
+            // Start Election
+            //LogHelper.WriteStatus("# Master Election Started #");
             ElectMasterNode();
+
         }
 
+        #endregion
+
+        #region Master election
+
         /// <summary>
-        /// Start Election of Master Node
+        /// Start election of master node
         /// </summary>
         public void ElectMasterNode()
         {
@@ -196,48 +262,56 @@ namespace DS_Network.Network
             // master node reset
             _masterNode = null;
 
-            _electionAlgorithm.startBullyElection(_nodeInfo, _hostLookup, _proxy);
+            _electionAlgorithm.StartBullyElection(_hostLookup);
         }
 
+        /// <summary>
+        /// Start election of master node by receiving election message
+        /// </summary>
         public void ElectMasterNodeByReceivingMsg(string id)
         {
-            Console.WriteLine("Received Election message from " + id);
+            Console.WriteLine("## Received Election message from " + id);
 
-            _electionAlgorithm.startBullyElection(_nodeInfo, _hostLookup, _proxy);
+            _electionAlgorithm.StartBullyElection(_hostLookup);
         }
 
         /// <summary>
         /// Setting master node. And starting algorithm if needed
         /// </summary>
-        /// <param name="ipAndPortMaster"></param>
-        /// <param name="isStartNeeded"></param>
-        public void SetMasterNode(String ipAndPortMaster, bool isStartNeeded)
+        public void SetMasterNode(String ipAndPortMaster)
         {
             _masterNode = new NodeInfo(ipAndPortMaster);
 
-            Console.WriteLine("Master is elected: " + _masterNode.GetIpAndPort());
-
-            _electionAlgorithm.finishElection();
-
-            if (isStartNeeded)
-            {
-                //START ALGORITHM. Because we know our master node. 
-                var startAlgorithm = new Thread(() => StartAlgorithm());
-                startAlgorithm.Start();
-            }
+            Console.WriteLine("## Master[" + _masterNode.GetIpAndPort() + "] is elected.");
+            
+            _electionAlgorithm.FinishElection();
+            _isElectionFinished.Set();
         }
 
-        private string GetRandomFruit()
-        {
-            var rnd = new Random();
+        #endregion
 
-            string[] fruits = { "apple", "mango", "papaya", "banana", "guava", "pineapple" };
-            return fruits[rnd.Next(0, fruits.Length)] + rnd.Next();
-        }
+        #region Distributed Read and Write operation
 
-        public void StartAlgorithm()
+        public void StartProcess(bool isRicartAlgorithm)
         {
-            var rnd = new Random();
+            ResetVariables();
+
+            LogHelper.WriteStatus("##### Start process using " + (isRicartAlgorithm ? "Ricart & Agrawala ": "Centralized ") 
+                + "Algorithm.");
+            LogHelper.WriteStatus("# 0. Waiting for the Master Election #");
+            _isElectionFinished.Reset();
+            
+            // wait the end of master election - which will be done by other thread.
+            _isElectionFinished.WaitOne();
+            Console.WriteLine();
+            LogHelper.WriteStatus("# Master Election ended. Now Start Read & Update Process.");
+            Console.WriteLine();
+
+
+            // 2. Read and Write operation using Centralized M.E. Sync. or Ricart Agrawala Sync.
+            var rnd =
+                new Random(int.Parse(Guid.NewGuid().ToString().Substring(0, 8),
+                    System.Globalization.NumberStyles.HexNumber));
             //var hostList = _hostLookup.Values.ToList();
             int count = 0;
             _startTime = DateTime.Now;
@@ -247,18 +321,24 @@ namespace DS_Network.Network
                 return;
             }
 
+            hostlistWithoutMaster = GetHostListWithoutMaster();
+            printHostList(hostlistWithoutMaster);
             do
             {
                 count++;
                 Console.WriteLine("Start iteration #" + count);
 
                 WaitRandomAmountTime(rnd);
-                
-                ProcessResourceFromMasterNode();
+
+                ProcessResourceFromMasterNode(isRicartAlgorithm);
 
                 var executeTime = DateTime.Now;
                 if (TimeSpan.Compare(executeTime - _startTime, _maxDuration) >= 0)
                 {
+                    if (isRicartAlgorithm && !IsMasterNode())
+                    {
+                        _ricartSyncAlgClient.Release_RA();
+                    }
                     Console.WriteLine("Exited loop with " + (executeTime - _startTime));
                     break;
                 }
@@ -266,17 +346,29 @@ namespace DS_Network.Network
 
             Thread.Sleep(5000);
             var finalString = ReadFromMasterNode();
-            _syncAlgorithm.Release();
+            Console.WriteLine("\n===============================");
             Console.WriteLine("Final string: " + finalString);
+            Console.WriteLine("===============================");
+            _isProcessFinished.Set();
         }
 
         /// <summary>
         /// Read, append and update
         /// </summary>
-        private void ProcessResourceFromMasterNode()
+        private void ProcessResourceFromMasterNode(bool isRicartAlgorithm)
         {
-            _syncAlgorithm.SendSyncRequestToAllHosts(GetHostListWithoutMaster());
-            //_syncAlgorithm.SendSyncRequestToMaster(MasterNode); // for CentralizedME
+            if (isRicartAlgorithm)
+            {
+                _ricartSyncAlgClient.SendSyncRequestToAllHosts_RA(hostlistWithoutMaster); //GetHostListWithoutMaster());
+            }
+            else
+            {
+                _centralizedSyncAlgClient.SendSyncRequestToMaster_CT(_masterNode);
+            }
+
+            // TEST:
+            Thread.Sleep(2000);
+
 
             //initialize client to communicate with master node
             var readResFromMn = ReadFromMasterNode();
@@ -293,7 +385,14 @@ namespace DS_Network.Network
 
             UpdateMasterNodeResource(appendedString);
 
-            _syncAlgorithm.Release();
+            if (isRicartAlgorithm)
+            {
+                _ricartSyncAlgClient.Release_RA();
+            }
+            else
+            {
+                _centralizedSyncAlgClient.Release_CT();
+            }
         }
 
         /// <summary>
@@ -305,17 +404,21 @@ namespace DS_Network.Network
             LogHelper.WriteStatus("Reading resource from Master Node by host with IP: " + _nodeInfo.GetIpAndPort());
             
             if (_masterNode.Id == _nodeInfo.Id) throw new ArgumentException("Cannot read resource from same HOST!");
-            _proxy.Url = _masterNode.GetFullUrl();
 
-            var strResultFromMn = _proxy.readResource(_nodeInfo.GetIpAndPort());
-            LogHelper.WriteStatus("Reading resource result" + strResultFromMn + " by host with IP: " + _nodeInfo.GetIpAndPort());
+            string strResultFromMn;
+            lock (Shared.SendLock)
+            {
+                _proxy.Url = _masterNode.GetFullUrl();
+                strResultFromMn = _proxy.ReadResource(_nodeInfo.GetIpAndPort());
+            }
+            LogHelper.WriteStatus("Reading resource result " + strResultFromMn + " by host with IP: " + _nodeInfo.GetIpAndPort());
             return strResultFromMn;
         }
 
         private void WaitRandomAmountTime(Random rnd)
         {
             //wait random amount of time
-            var sleepTime = rnd.Next(2000, 5001); //generate a random waiting time between 2s and 4s
+            var sleepTime = rnd.Next(2000, 4001); //generate a random waiting time between 2s and 4s
             Console.WriteLine("Start waiting for " + sleepTime / 1000 + " sec");
             Thread.Sleep(sleepTime);
             Console.WriteLine("Finished waiting for " + sleepTime / 1000 + " sec");
@@ -328,9 +431,11 @@ namespace DS_Network.Network
         private void UpdateMasterNodeResource(string appendedString)
         {
             if (_masterNode.Id == _nodeInfo.Id) throw new ArgumentException("Cannot read resource from same HOST!");
-            _proxy.Url = _masterNode.GetFullUrl();
-            _proxy.updateResource(appendedString, _nodeInfo.GetIpAndPort());
-
+            lock (Shared.SendLock)
+            {
+                _proxy.Url = _masterNode.GetFullUrl();
+                _proxy.UpdateResource(appendedString, _nodeInfo.GetIpAndPort());
+            }
             LogHelper.WriteStatus("Updated string To Master Node with IP: " + _masterNode.GetIpAndPort());
         }
 
@@ -339,13 +444,48 @@ namespace DS_Network.Network
             var listCopy = _hostLookup.Values.ToList();
             //listCopy.Add(_nodeInfo);
 
-            listCopy.RemoveAll(x => x.GetIpAndPort() == MasterNode.GetIpAndPort());
+            listCopy.RemoveAll(x => x.GetIpAndPort() == _masterNode.GetIpAndPort());
             return listCopy;
-        } 
+        }
+
+        private void printHostList(List<NodeInfo> list)
+        {
+            Console.WriteLine("***** host list *****");
+            foreach (var node in list)
+            {
+                Console.Write(node.Id + ", ");
+            }
+            Console.WriteLine();
+        }
 
         public bool IsMasterNode()
         {
             return _nodeInfo.IsSameHost(_masterNode);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private string GetRandomFruit()
+        {
+            var rnd = new Random(int.Parse(Guid.NewGuid().ToString().Substring(0, 8), System.Globalization.NumberStyles.HexNumber));
+
+            string[] fruits = { "apple", "mango", "papaya", "banana", "guava", "pineapple" };
+            return fruits[rnd.Next(0, fruits.Length)] + rnd.Next();
+        }
+        
+        #endregion
+
+        private void ResetVariables()
+        {
+            _appendedStringSet = new HashSet<string>();
+            _masterNode = null;
+            Resource = string.Empty;
+
+            _electionAlgorithm.BullyReset();
+            _centralizedSyncAlgClient.CentralizedReset();
+            _ricartSyncAlgClient.RicartReset();
+        }
+
     }
 }

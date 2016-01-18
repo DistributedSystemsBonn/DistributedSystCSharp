@@ -1,22 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using CookComputing.XmlRpc;
 using DS_Network.Network;
 
 namespace DS_Network.Election
 {
     public class Bully : IElectionAlgorithm
     {
-        public ManualResetEvent _isElectionFinished = new ManualResetEvent(false);
-        public ManualResetEvent _isThisNodeLost = new ManualResetEvent(false);
-        public bool _isExecuted = false;
-        
-        public Bully()
+        private ManualResetEvent _isElectionFinished = new ManualResetEvent(false);
+        private ManualResetEvent _isThisNodeLost = new ManualResetEvent(false);
+        private NodeInfo _node;
+        private IConnectionProxy _proxy;
+        private bool _isExecuted;
+
+        public Bully(NodeInfo node, IConnectionProxy proxy)
         {
+            _node = node;
+            _proxy = proxy;
+            _isExecuted = false;
         }
 
         /// <summary>
-        /// reset static variables
+        /// reset variables
         /// </summary>
         public void BullyReset()
         {
@@ -25,23 +32,26 @@ namespace DS_Network.Election
             _isExecuted = false;
         }
 
-        public void startBullyElection(NodeInfo node, Dictionary<string, NodeInfo> hostLookup, IConnectionProxy proxy)
-        {
-            if (_isExecuted)    // to assure single execution
-                return;
-            _isExecuted = true;
 
-            int timeout = 2000;         // timeout for bully: 2 sec.
-            Console.WriteLine(" - Master node election started.");
+        /// <summary>
+        /// First step of the bully algorithm
+        /// </summary>
+        public void StartBullyElection(Dictionary<string, NodeInfo> hostLookup)
+        {
+            if (_isExecuted) return;
+            _isExecuted = true;
             
-            foreach (NodeInfo host in hostLookup.Values)
+            int timeout = 2000; // timeout for bully: 2 sec.
+            Console.WriteLine("## Master node election started. ##");
+
+            // find hosts with bigger id compared to the client
+            foreach (var host in hostLookup.Values.Where(host => _node.Compare(host) == -1))
             {
-                if (node.Compare(host) == -1)    // find hosts with bigger id compared to the client
-                {
-                    Console.WriteLine("election target host: " + host.GetIpAndPort());
-                    Thread send = new Thread(() => sendElectionMsg(node, host, proxy));
-                    send.Start();
-                }
+                Console.WriteLine("election target host: " + host.GetIpAndPort());
+
+                var hostCopy = host;
+                var send = new Thread(() => SendElectionMsg(hostCopy, _proxy));
+                send.Start();
             }
             if (_isThisNodeLost.WaitOne(timeout))
             {
@@ -53,35 +63,48 @@ namespace DS_Network.Election
                 Console.WriteLine("Time out - client won");
 
                 // Declare "I'm the new master" to all the nodes in the network
-                foreach (NodeInfo host in hostLookup.Values)
+                // When this node is the winner(master), it send final election msg to other machines
+                foreach (var host in hostLookup.Values)
                 {
-                    sendElectionFinalMsg(node, host, proxy);
+                    SendElectionFinalMsg(host);
                 }
-                sendElectionFinalMsg(node, node, proxy);    // set masternode itself
+                SendElectionFinalMsg(_node); // set masternode itself
             }
 
-            _isElectionFinished.WaitOne();  // wait for end of all of election processes
+            _isElectionFinished.WaitOne(); // wait for end of all of election processes
             Console.WriteLine(" - Master node election ended.");
             BullyReset();
         }
 
-        public void sendElectionMsg(NodeInfo node, NodeInfo target, IConnectionProxy proxy)
+        /// <summary>
+        /// Send election message to target host
+        /// </summary>
+        public void SendElectionMsg(NodeInfo target, IConnectionProxy proxy)
         {
+            //var proxy1 = XmlRpcProxyGen.Create<IConnectionProxy>();
             proxy.Url = target.GetFullUrl();
-            if (proxy.ReceiveElectionMsg(node.Id.ToString()))
+            if (proxy.ReceiveElectionMsg(_node.Id.ToString()))
             {
                 // when target response
                 _isThisNodeLost.Set();  // declare this node is lost
             }
         }
 
-        public void sendElectionFinalMsg(NodeInfo node, NodeInfo target, IConnectionProxy proxy)
+        /// <summary>
+        /// When this node is the winner(master), it send final election msg to other machines
+        /// </summary>
+        public void SendElectionFinalMsg(NodeInfo target)
         {
-            proxy.Url = target.GetFullUrl();
-            proxy.SetMasterNode(node.GetIpAndPort());
+            //var proxy1 = XmlRpcProxyGen.Create<IConnectionProxy>();
+            _proxy.Url = target.GetFullUrl();
+            _proxy.SetMasterNode(_node.GetIpAndPort());
         }
 
-        public void finishElection()
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void FinishElection()
         {
             _isElectionFinished.Set();
         }

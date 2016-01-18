@@ -3,21 +3,19 @@ using DS_Network.Network;
 
 namespace DS_Network.Sync
 {
-    public interface ISyncAlgorithmClient
+    public interface IRicartSyncAlgorithmClient
     {
         /// <summary>
         /// Send request
         /// </summary>
-        void SendSyncRequestToAllHosts(List<NodeInfo> toSendHosts);
-
-        void SendSyncRequestToMaster(NodeInfo masterNode);
+        void SendSyncRequestToAllHosts_RA(List<NodeInfo> toSendHosts);
 
         /// <summary>
         /// Access critical point
         /// </summary>
         /// <returns>resource</returns>
-        void Release();
+        void Release_RA();
+
+        void RicartReset();
     }
 }
-
-

@@ -9,7 +9,7 @@ namespace DS_Network.Sync.Ricart
     /// <summary>
     /// Client part of ricart algorithm
     /// </summary>
-    public class RicartSyncAlgorithmClient : ISyncAlgorithmClient
+    public class RicartSyncAlgorithmClient : IRicartSyncAlgorithmClient
     {
         private RicartSyncAlgorithm _module;
         //lock until all messages received
@@ -20,50 +20,63 @@ namespace DS_Network.Sync.Ricart
             _module = module;
         }
 
-        public void SendSyncRequestToAllHosts(List<NodeInfo> toSendHosts)
+        /// <summary>
+        /// Send Request msg to all the hosts in the network
+        /// </summary>
+        /// <param name="toSendHosts">list without Master Node and itself</param>
+        public void SendSyncRequestToAllHosts_RA(List<NodeInfo> toSendHosts)
         {
-            //lock (Shared.SharedLock)
-            //{
+            //wait until receive all messages.
             HasGotAllMessagesBack.Reset();
-                _module.State = AccessState.Requested;
+            _module.State = AccessState.Requested;
 
-                LogHelper.WriteStatus("Client: " + _module.LocalId + ": Current timestamp: " + _module.Clock.Value);
-                LogHelper.WriteStatus("Client: " + _module.LocalId + ": Capacity: " + toSendHosts.Count);
-                _module.IsInterested = true;
+            LogHelper.WriteStatus("Client: [" + _module.LocalId + "] Current timestamp: " + _module.Clock.Value);
+            LogHelper.WriteStatus("Client: [" + _module.LocalId + "] Capacity: " + toSendHosts.Count);
+            _module.IsInterested = true;
 
-                foreach (var host in toSendHosts)
-                {
-                    var newThread =
-                        new Thread(
-                            () => SendSyncMsg(_module.Proxy, host));
-                    newThread.Start();
-                    Thread.Sleep(5);
-                }
-            //}
-            
+            foreach (var host in toSendHosts)
+            {
+                var host1 = host;
+                LogHelper.WriteStatus(" CLIENT: SEND REQ FROM: [" + _module.LocalNodeInfo.GetIpAndPort() + "] TO: [" +
+                                      host1.Id + "]");
+                var newThread =
+                    new Thread(
+                        () => SendSyncMsg(_module.Proxy, host1));
+                newThread.Start();
+            }
 
             //wait until receive all messages. .Set() method is called in RicartSyncAlgServer
             HasGotAllMessagesBack.WaitOne();
 
-            LogHelper.WriteStatus("CLIENT: RECV ALL ACCEPT MESSAGES AT: " + _module.LocalId);
+            LogHelper.WriteStatus("CLIENT: RECV ALL ACCEPT MESSAGES AT: [" + _module.LocalId + "]");
             _module.State = AccessState.Held;
         }
 
-        public void SendSyncMsg(IConnectionProxy proxy, NodeInfo toNode)
+        /// <summary>
+        /// Send Req message to a node
+        /// </summary>
+        private void SendSyncMsg(IConnectionProxy proxy1, NodeInfo toNode)
         {
-            //lock (Shared.SharedLock)
-            //{
-                var logicClockTs = _module.Clock.SendEventHandle();
+            var logicClockTs = _module.Clock.SendEventHandle();
 
-                _module.AddToAcceptList(toNode.GetIpAndPort());
-                var urlToSend = toNode.GetFullUrl(); ;
-                proxy.Url = urlToSend;
-                Debug.WriteLine("CLIENT: SEND REQ FROM: " + _module.LocalNodeInfo.GetIpAndPort() + " TO: " + _module.Proxy.Url);
-                _module.Proxy.GetSyncRequest(logicClockTs, _module.LocalNodeInfo.Id, _module.LocalNodeInfo.GetIpAndPort());
-            //}
+            _module.AddToAcceptList(toNode.GetIpAndPort());
+            var urlToSend = toNode.GetFullUrl();
+                
+            //LogHelper.WriteStatus("CLIENT: SEND REQ FROM: [" + _module1.LocalNodeInfo.GetIpAndPort() + "] TO: [" +
+            //                      proxy1.Url + "]");
+            //.WriteLine("CLIENT: SEND REQ FROM: " + _module1.LocalNodeInfo.GetIpAndPort() + " TO: " + _module1.Proxy1.Url);
+            lock (Shared.SendLock)
+            {
+                proxy1.Url = urlToSend;
+                proxy1.GetSyncRequest_RA(logicClockTs, _module.LocalNodeInfo.Id, _module.LocalNodeInfo.GetIpAndPort());
+            }
         }
 
-        public void Release()
+        /// <summary>
+        /// Release the resource.
+        /// Send Accept responses to all nodes in the queue
+        /// </summary>
+        public void Release_RA()
         {
             _module.PrintQueue();
 
@@ -72,12 +85,20 @@ namespace DS_Network.Sync.Ricart
 
             foreach (var request in _module.Queue)
             {
-                _module.Server.SendAcceptResponse(request.ipAndPort);
+                _module.Server.SendAcceptResponse(request.IpAndPort);
             }
 
             _module.Queue.Clear();
 
-            LogHelper.WriteStatus("Client: Released resource at " + _module.LocalNodeInfo.GetIpAndPort());
+            LogHelper.WriteStatus("Client: Released resource at [" + _module.LocalNodeInfo.GetIpAndPort() + "]");
+        }
+
+        /// <summary>
+        /// Reset variables to start again
+        /// </summary>
+        public void RicartReset()
+        {
+            _module.RicartReset();
         }
     }
 }

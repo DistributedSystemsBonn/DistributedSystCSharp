@@ -4,8 +4,8 @@ namespace DS_Network.Clock
 {
     public class ExtendedLamportClock
     {
-        private long _localId;
-        public int Value { get; set; }
+        private long _localId;          // Machine ID
+        public int Value { get; set; }  // Logical Clock
 
         public ExtendedLamportClock(long localId)
         {
@@ -36,10 +36,16 @@ namespace DS_Network.Clock
                 Value = candidateValue;
             }
             Increment();
-            LogHelper.WriteStatus("UPDATE CLOCK TO:" + Value);
+            LogHelper.WriteStatus("UPDATE CLOCK TO: " + Value);
             return Value;
         }
 
+        /// <summary>
+        /// Compare time stamps between two machines
+        /// </summary>
+        /// <param name="requestLamportClock"></param>
+        /// <param name="remoteId"></param>
+        /// <returns>true: request is smaller, false: request is bigger</returns>
         public bool CompareTime(int requestLamportClock, long remoteId)
         {
             //LogHelper.WriteStatus()

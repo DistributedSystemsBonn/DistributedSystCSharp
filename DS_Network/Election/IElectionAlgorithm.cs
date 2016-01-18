@@ -5,14 +5,10 @@ namespace DS_Network.Election
 {
     public interface IElectionAlgorithm
     {
-        /// <summary>
-        /// reset static variables
-        /// </summary>
         void BullyReset();
-
-        void startBullyElection(NodeInfo node, Dictionary<string, NodeInfo> hostLookup, IConnectionProxy proxy);
-        void sendElectionMsg(NodeInfo node, NodeInfo target, IConnectionProxy proxy);
-        void sendElectionFinalMsg(NodeInfo node, NodeInfo target, IConnectionProxy proxy);
-        void finishElection();
+        void StartBullyElection(Dictionary<string, NodeInfo> hostLookup);
+        void SendElectionMsg(NodeInfo target, IConnectionProxy proxy);
+        void SendElectionFinalMsg(NodeInfo target);
+        void FinishElection();
     }
 }

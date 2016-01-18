@@ -8,19 +8,9 @@ using DS_Network.Network;
 
 namespace DS_Network.Sync.Ricart
 {
-    public static class Shared
-    {
-        public static readonly object SharedLock = new object();
-        public static readonly object RecvLock = new object();
-        public static readonly object SendLock = new object();
-    }
-
     public class RicartSyncAlgorithm
     {
-        private bool _isInterested;
-
         private ExtendedLamportClock _clock;
-
         public ExtendedLamportClock Clock
         {
             get
@@ -29,17 +19,21 @@ namespace DS_Network.Sync.Ricart
             }
         }
 
+        private bool _isInterested;
         public bool IsInterested
         {
             get { return _isInterested; }
             set
             {
                 //Is interested - local event
-                //IncrementLamportClock();
                 Clock.LocalEventHandle();
                 _isInterested = value;
             }
         }
+
+        public NodeInfo LocalNodeInfo { get; private set; }
+        public IConnectionProxy Proxy { get; private set; }
+        public long LocalId { get; private set; }
 
         /// <summary>
         /// Need this list to ensure that client got all accept messages
@@ -47,36 +41,38 @@ namespace DS_Network.Sync.Ricart
         /// </summary>
         private List<string> _acceptList = new List<string>();
 
+        #region AcceptList
+        /// <summary>
+        /// to check if it got all response for sent requests.
+        /// </summary>
         public bool IsGotAllOk()
         {
             return _acceptList.Count == 0;
         }
 
+        /// <summary>
+        /// Add item into list
+        /// </summary>
         public void AddToAcceptList(string ipAndPort)
         {
-            //lock (Shared.SharedLock)
-            //{
-                _acceptList.Add(ipAndPort);
-            //}
+           _acceptList.Add(ipAndPort);
         }
-
+        /// <summary>
+        /// remove item from list
+        /// </summary>
         public void RemoveFromAcceptList(string ipAndPort)
         {
-            //lock (Shared.SharedLock)
-            //{
-                Debug.WriteLine("SERVER: " + LocalId + "REMOVE IP: " + ipAndPort);
-
-                if (!_acceptList.Remove(ipAndPort))
-                {
-                    throw new ArgumentException("Element in accept list doesnt exist: " + ipAndPort);
-                }
-            //}
+            Console.WriteLine("SERVER: " + LocalId + " REMOVE IP: " + ipAndPort);
+            if (!_acceptList.Remove(ipAndPort))
+            {
+                throw new ArgumentException("Element in accept list doesnt exist: " + ipAndPort);
+            }
         }
+        #endregion
 
         public AccessState State { get; set; }
 
         private List<DataRequest> _queue = new List<DataRequest>();
-
         public List<DataRequest> Queue
         {
             get
@@ -87,26 +83,25 @@ namespace DS_Network.Sync.Ricart
 
         #region Request _queue
 
+        /// <summary>
+        /// Add a request into queue and order it.
+        /// </summary>
         public void AddRequest(DataRequest request)
         {
-            //lock (Shared.SharedLock)
-            //{
-                LogHelper.WriteStatus("Server: Add request to queue: " + request.CallerId + " with timestamp: " +
-                                          request.Time);
-                _queue.Add(request);
-                _queue = _queue.OrderBy(x => x.Time).ToList();
-                //_queue = _queue.OrderBy(x => x.Time).ThenBy(x => x.CallerId).ToList();
-            //}
+            LogHelper.WriteStatus("Server: Add request to queue: " + request.CallerId + " with timestamp: " + request.Time);
+            _queue.Add(request);
+            _queue = _queue.OrderBy(x => x.Time).ToList();
+            
+            PrintQueue();
         }
-
+        /// <summary>
+        /// pop a request from queue
+        /// </summary>
         public void PopRequest(DataRequest request)
         {
-            //lock (Shared.SharedLock)
-            //{
-                _queue.Remove(request);
-                LogHelper.WriteStatus("Server: Remove request from queue: " + request.CallerId + " with timestamp: " +
-                                          request.Time);
-            //}
+            _queue.Remove(request);
+            LogHelper.WriteStatus("Server: Remove request from queue: " + request.CallerId + " with timestamp: " + request.Time);
+            PrintQueue();
         }
 
         public int GetQueueCount()
@@ -116,13 +111,15 @@ namespace DS_Network.Sync.Ricart
 
         public void PrintQueue()
         {
-            Console.WriteLine("Queue:: ");
-            foreach (var q in _queue) 
+            string print = "-- Queue::\n";
+            //Console.Write("-- Queue:: ");
+            int i = 1;
+            foreach (var q in Queue)
             {
-                Console.Write(q.ipAndPort);
-                Console.Write(", ");
+                print += i++.ToString() + ": " + q.IpAndPort + ", " + q.Time + "\n";
             }
-            Console.WriteLine("");
+            Console.WriteLine(print + "\n");
+            //Console.WriteLine("");
         }
 
         #endregion Request _queue
@@ -130,22 +127,31 @@ namespace DS_Network.Sync.Ricart
         public RicartSyncAlgorithmClient Client { get; private set; }
         public RicartSyncAlgorithmServer Server { get; private set; }
 
+        /// <summary>
+        /// constructor
+        /// </summary>
         public RicartSyncAlgorithm(NodeInfo nodeInfo, IConnectionProxy proxy)
         {
             State = AccessState.Released;
-            Client = new RicartSyncAlgorithmClient(this);
-            Server = new RicartSyncAlgorithmServer(this);
-            //_acceptList = new List<string>();
             LocalId = nodeInfo.Id;
             Proxy = proxy;
             LocalNodeInfo = nodeInfo;
             _clock = new ExtendedLamportClock(LocalId);
+
+            Client = new RicartSyncAlgorithmClient(this);
+            Server = new RicartSyncAlgorithmServer(this);
         }
 
-        public NodeInfo LocalNodeInfo { get; private set; }
-
-        public IConnectionProxy Proxy { get; private set; }
-
-        public long LocalId { get; private set; }
+        /// <summary>
+        /// Reset variables to start again
+        /// </summary>
+        public void RicartReset()
+        {
+            _clock = new ExtendedLamportClock(LocalId);
+            State = AccessState.Released;
+            _isInterested = false;
+            _acceptList = new List<string>();
+            _queue = new List<DataRequest>();
+        }
     }
 }

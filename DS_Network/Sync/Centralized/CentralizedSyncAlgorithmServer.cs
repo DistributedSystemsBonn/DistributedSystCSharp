@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DS_Network.Helpers;
+﻿using DS_Network.Helpers;
 
 namespace DS_Network.Sync.Centralized
 {
-    public class CentralizedSyncAlgorithmServer : ISyncAlgorithmServer
+    public class CentralizedSyncAlgorithmServer : ICentralizedSyncAlgorithmServer
     {
         private CentralizedSyncAlgorithm _module;
         public CentralizedSyncAlgorithmServer(CentralizedSyncAlgorithm module)
@@ -15,47 +10,64 @@ namespace DS_Network.Sync.Centralized
             _module = module;
         }
 
-        public void GetSyncRequest(int timestamp, long id, string ipAndPort) 
+        /// <summary>
+        /// Master: Get Sync Request msg from hosts
+        /// </summary>
+        public void GetSyncRequest_CT(long id, string ipAndPort) 
         {
             var request = new DataRequest()
             {
-                Time = timestamp,
-                Id = _module.LocalId,
+                Time = 0,
+                Id = 0,
                 CallerId = id,
-                ipAndPort = ipAndPort
+                IpAndPort = ipAndPort
             };
 
-            
+            LogHelper.WriteStatus("Master: get request from " + id);
+
             if (_module.State == AccessState.Released)
             { // if resource is released 
                 SendAcceptResponse(ipAndPort);
             }
             else if (_module.State == AccessState.Held)
-            { // if resource is held by some client, add the request into queue
+            { // if resource is held by a host, add the request into queue
                 _module.AddRequest(request);
             }
         }
 
+        /// <summary>
+        /// Master: Send msg to a host - accept for resource
+        /// </summary>
         private void SendAcceptResponse(string ipAndPort)
         {
+            LogHelper.WriteStatus("Accept for Resource to " + ipAndPort);
             _module.Proxy.Url = NetworkHelper.FormXmlRpcUrl(ipAndPort);
             //send accept response
-            _module.Proxy.GetAcceptResponse("");
+            _module.State = AccessState.Held;
+            _module.Proxy.GetAcceptResponse_CT();
         }
 
-        public void GetAcceptResponse(string fromIpAndPort) 
+        /// <summary>
+        /// Get Accept message from master
+        /// </summary>
+        public void GetAcceptResponse_CT() 
         {
-            _module.Client._isAllowed.Set();
+            LogHelper.WriteStatus("Accepted for resource");
+            _module.Client.IsAllowed.Set();
         }
 
-        public void GetReleasedMsg(string fromIpAndPort)
+        /// <summary>
+        /// Master: Get released msg from a host
+        /// </summary>
+        public void GetReleasedMsg_CT(long id, string fromIpAndPort)
         {
+            LogHelper.WriteStatus("Master: Released from " + fromIpAndPort);
             _module.State = AccessState.Released;
 
             var next = _module.PopRequest();
             if (next != null)
             {
-                SendAcceptResponse(next.ipAndPort);
+                SendAcceptResponse(next.IpAndPort);
             }
         }
     }

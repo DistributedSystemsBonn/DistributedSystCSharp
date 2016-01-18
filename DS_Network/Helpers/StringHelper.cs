@@ -11,9 +11,11 @@ namespace DS_Network.Helpers
             "join",
             "start",
             "signoff",
-            "start",
-            "gethosts",
-            "election"
+            "start_ct",
+            "start_ra",
+            "gethosts"
+            //,
+            //"election"
         }; 
 
         public static String[] GetCommandArray(string command)

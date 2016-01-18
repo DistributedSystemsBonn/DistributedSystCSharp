@@ -1,87 +1,34 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Http;
-using System.Text;
 using System.Threading;
 using CookComputing.XmlRpc;
+using DS_Network.Helpers;
 using DS_Network.Sync;
 
 namespace DS_Network.Network
 {
-    public class Server : MarshalByRefObject, IConnectionService, ISyncAlgorithmServer
+    public class Server : MarshalByRefObject, IConnectionService, IRicartSyncAlgorithmServer, ICentralizedSyncAlgorithmServer
     {
         private int _port;
         private static Node _client;
-        private static ISyncAlgorithmServer _syncAlgorithmServer;
+        private static IRicartSyncAlgorithmServer _ricartSyncAlgServer;
+        private static ICentralizedSyncAlgorithmServer _centralizedSyncAlgServer;
 
         public Server()
         {
             
         }
 
-        public Server(int port, ISyncAlgorithmServer syncAlg, Node client)
+        public Server(int port, Node client,
+            IRicartSyncAlgorithmServer ricartSyncAlgorithm, ICentralizedSyncAlgorithmServer centralizedSyncAlgorithm)
         {
             _port = port;
             _client = client;
-            _syncAlgorithmServer = syncAlg;
-        }
-
-        public bool join(string ipAndPort)
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Sign off from network.
-        /// </summary>
-        /// <returns></returns>
-        public bool signOff(string ipAndPort)
-        {
-            var hostList = _client.HostLookup;
-
-            return hostList.Remove(ipAndPort);
-        }
-
-        /// <summary>
-        /// Start algorithm
-        /// </summary>
-        /// <returns></returns>
-        public bool start()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Get list of hosts
-        /// </summary>
-        /// <param name="ipAndPortCallee"></param>
-        /// <returns></returns>
-        public Object[] getHosts(String ipAndPortCallee)
-        {
-            var hostList = _client.HostLookup;
-            var listToSend = new ArrayList();
-
-            foreach (var host in hostList.Values)
-            {
-                listToSend.Add(host.GetIpAndPort());
-            }
-
-            _client.AddNewHost(ipAndPortCallee);
-
-            return listToSend.ToArray();
-        }
-
-        /// <summary>
-        /// Add new host to client (when join operation)
-        /// </summary>
-        /// <param name="ipAndPort"></param>
-        public void addNewHost(string ipAndPort)
-        {
-            _client.AddNewHost(ipAndPort);
+            _ricartSyncAlgServer = ricartSyncAlgorithm;
+            _centralizedSyncAlgServer = centralizedSyncAlgorithm;
         }
 
         /// <summary>
@@ -98,19 +45,101 @@ namespace DS_Network.Network
               new XmlRpcServerFormatterSinkProvider()
            );
             ChannelServices.RegisterChannel(channel, false);
-            
+
             RemotingConfiguration.RegisterWellKnownServiceType(
               typeof(Server),
               "xmlrpc",
-              //"/",
+                //"/",
               WellKnownObjectMode.Singleton);
         }
 
+        #region SignOff operation
         /// <summary>
-        /// 
+        /// Sign off from network.
         /// </summary>
-        /// <param name="id"></param>
         /// <returns></returns>
+        public bool SignOff(string ipAndPort)
+        {
+            var hostList = _client.HostLookup;
+
+            LogHelper.WriteStatus("Node [" + ipAndPort + "] is signed off.");
+            return hostList.Remove(ipAndPort);
+        }
+        #endregion
+
+        #region Join operation
+        /// <summary>
+        /// Get list of hosts
+        /// </summary>
+        /// <param name="ipAndPortCallee"></param>
+        /// <returns></returns>
+        public Object[] GetHosts(string ipAndPortCallee)
+        {
+            var hostList = _client.HostLookup;
+            var listToSend = new ArrayList();
+
+            foreach (var host in hostList.Values)
+            {
+                listToSend.Add(host.GetIpAndPort());
+            }
+
+            AddNewHost(ipAndPortCallee);
+
+            return listToSend.ToArray();
+        }
+
+        /// <summary>
+        /// Add new host to client (when join operation)
+        /// </summary>
+        public void AddNewHost(string ipAndPort)
+        {
+            LogHelper.WriteStatus("New node joined: " + ipAndPort);
+            _client.AddNewHost(ipAndPort);
+        }
+        #endregion
+
+        #region start and sync
+        /// <summary>
+        /// Start algorithm - every node receive this message.
+        /// </summary>
+        public void GetStartMsg(bool isRicartAlgorithm)
+        {
+            Thread proc = new Thread(() => _client.StartProcess(isRicartAlgorithm));
+            proc.Start();
+        }
+
+        public void GetSyncRequest_CT(long id, string ipAndPort)
+        {
+            _centralizedSyncAlgServer.GetSyncRequest_CT(id, ipAndPort);
+        }
+
+        public void GetReleasedMsg_CT(long id, string fromIpAndPort)
+        {
+            _centralizedSyncAlgServer.GetReleasedMsg_CT(id, fromIpAndPort);
+        }
+
+        public void GetAcceptResponse_CT()
+        {
+            _centralizedSyncAlgServer.GetAcceptResponse_CT();
+        }
+
+        public void GetSyncRequest_RA(int timestamp, long id, string ipAndPort)
+        {
+            _ricartSyncAlgServer.GetSyncRequest_RA(timestamp, id, ipAndPort);
+        }
+
+        public void GetAcceptResponse_RA(string fromIpAndPort, int timestamp)
+        {
+            _ricartSyncAlgServer.GetAcceptResponse_RA(fromIpAndPort, timestamp);
+        }
+
+        #endregion
+
+        #region Election - Bully Algorithm
+
+        /// <summary>
+        /// Receiving election message from other candidate host
+        /// </summary>
         public bool ReceiveElectionMsg(string id)
         {
             Thread election = new Thread(() => _client.ElectMasterNodeByReceivingMsg(id));
@@ -119,42 +148,37 @@ namespace DS_Network.Network
             return true;    // always return true;
         }
 
-        public void SetMasterNode(String ipAndPortMaster)
+        /// <summary>
+        /// Setting master node by receiving message from the elected master node
+        /// </summary>
+        /// <param name="ipAndPortMaster"></param>
+        public void SetMasterNode(string ipAndPortMaster)
         {
-            Console.WriteLine("Set Master Node: " + ipAndPortMaster);
-            _client.SetMasterNode(ipAndPortMaster, true);
+            //Console.WriteLine("Set Master Node: " + ipAndPortMaster);
+            _client.SetMasterNode(ipAndPortMaster);
         }
 
+        #endregion
+
+        #region Read and Write
         /// <summary>
         /// Read string variable from Master Node or Node (not used)
         /// </summary>
         /// <returns></returns>
-        public string readResource(string ipAndPort)
+        public string ReadResource(string ipAndPort)
         {
-            Console.WriteLine("Read resource from: " + ipAndPort);
+            Console.WriteLine("\nRead resource from: " + ipAndPort);
+            Console.WriteLine("::Current String:: " + _client.Resource);
             return _client.Resource;
         }
 
-        public void updateResource(string updateStr, string ipAndPort)
+        public void UpdateResource(string updateStr, string ipAndPort)
         {
-            Console.WriteLine("Update resource from: " + ipAndPort);
+            Console.WriteLine("\nUpdate resource from: " + ipAndPort);
             _client.Resource = updateStr;
+            Console.WriteLine("::String:: " + _client.Resource);
             //_module.AdjustLastRequestTsToNow();
         }
-
-        public void GetSyncRequest(int timestamp, long id, string ipAndPort)
-        {
-            _syncAlgorithmServer.GetSyncRequest(timestamp, id, ipAndPort);
-        }
-
-        public void GetAcceptResponse(string fromIpAndPort, int timestamp)
-        {
-            _syncAlgorithmServer.GetAcceptResponse(fromIpAndPort, timestamp);
-        }
-
-        public void GetReleasedMsg(string fromIpAndPort) 
-        {
-            _syncAlgorithmServer.GetReleasedMsg(fromIpAndPort);
-        }
+        #endregion
     }
 }

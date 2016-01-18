@@ -1,59 +1,56 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading;
 using DS_Network.Network;
 
 namespace DS_Network.Sync.Centralized
 {
-    public class CentralizedSyncAlgorithmClient : ISyncAlgorithmClient
+    public class CentralizedSyncAlgorithmClient : ICentralizedSyncAlgorithmClient
     {
 
-        public ManualResetEvent _isAllowed = new ManualResetEvent(false);
-        
+        public ManualResetEvent IsAllowed = new ManualResetEvent(false);
         private CentralizedSyncAlgorithm _module;
+
         public CentralizedSyncAlgorithmClient(CentralizedSyncAlgorithm module)
         {
             _module = module;
         }
 
         /// <summary>
-        /// 
+        /// Send Sync Req to Master node
         /// </summary>
-        /// <param name="masterNode"></param>
-        public void SendSyncRequestToMaster(NodeInfo masterNode)
+        public void SendSyncRequestToMaster_CT(NodeInfo masterNode)
         {
-            _isAllowed.Reset();
+            IsAllowed.Reset();
             _module.Proxy.Url = masterNode.GetFullUrl();
-            var newThread = new Thread(
+            // to evade time out - using thread and wait for an acceptance trigger.
+            var send = new Thread(
                         () => SendSyncMsg(_module.Proxy, masterNode));
-            newThread.Start();
+            send.Start();
 
             // wait until the master allow to accept to the resource
-            _isAllowed.WaitOne();
+            IsAllowed.WaitOne();
         }
 
         /// <summary>
-        /// 
+        /// Send Sync Req to Master node
         /// </summary>
-        /// <param name="proxy"></param>
-        /// <param name="toNode"></param>
         private void SendSyncMsg(IConnectionProxy proxy, NodeInfo toNode) 
         {
             proxy.Url = toNode.GetFullUrl();
-            _module.Proxy.GetSyncRequest(0, toNode.Id, _module.LocalNodeInfo.GetIpAndPort());
+            _module.Proxy.GetSyncRequest_CT(_module.LocalNodeInfo.Id, _module.LocalNodeInfo.GetIpAndPort());
         }
-
-
-        public void SendSyncRequestToAllHosts(List<NodeInfo> toSendHosts) { }
         
         /// <summary>
-        /// 
+        /// Release master resource
         /// </summary>
-        public void Release() 
+        public void Release_CT() 
         {
-            _module.Proxy.GetReleasedMsg(_module.LocalNodeInfo.GetIpAndPort());
+            _module.Proxy.GetReleasedMsg_CT(_module.LocalNodeInfo.Id, _module.LocalNodeInfo.GetIpAndPort());
+        }
+
+        public void CentralizedReset()
+        {
+            _module.CentralizedReset();
         }
     }
 }

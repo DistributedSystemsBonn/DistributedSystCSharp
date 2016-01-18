@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ServiceModel;
-using System.Text.RegularExpressions;
+using System.Threading;
 using CookComputing.XmlRpc;
 using DS_Network.Election;
 using DS_Network.Helpers;
@@ -11,20 +9,20 @@ using DS_Network.Sync.Centralized;
 
 namespace DS_Network
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
             var proxy = XmlRpcProxyGen.Create<IConnectionProxy>();
             var port = NetworkHelper.FindFreePort();
-            var electAlg = new Bully();
             var ipAddress = NetworkHelper.FindIp().ToString();
             var nodeInfo = new NodeInfo(ipAddress, port);
-            //var syncAlgorithm = new RicartSyncAlgorithm(nodeInfo, proxy);
-            var syncAlgorithm = new CentralizedSyncAlgorithm(nodeInfo, proxy);
+            var electAlg = new Bully(nodeInfo, proxy);
+            var ricartSyncAlgorithm = new RicartSyncAlgorithm(nodeInfo, proxy);
+            var centralizedSyncAlgorithm = new CentralizedSyncAlgorithm(nodeInfo, proxy);
 
-            var client = new Node(nodeInfo, proxy, electAlg, syncAlgorithm.Client, port); //client
-            var server = new Server(port, syncAlgorithm.Server, client);
+            var client = new Node(nodeInfo, proxy, electAlg, ricartSyncAlgorithm.Client, centralizedSyncAlgorithm.Client);
+            var server = new Server(port, client, ricartSyncAlgorithm.Server, centralizedSyncAlgorithm.Server);
             var host = new Host(client, server);
 
             Console.WriteLine("Client IP: " + client.NodeInfo.GetIpAndPort());
@@ -32,7 +30,7 @@ namespace DS_Network
             
             while (true)
             {
-                
+                Console.Write("["+client.NodeInfo.GetIpAndPort()+"] ");
                 Console.WriteLine("The service is ready, please write commands: ");
                 var command = Console.ReadLine();
                 try

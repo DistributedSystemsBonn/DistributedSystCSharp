@@ -1,56 +1,86 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using DS_Network.Helpers;
 using DS_Network.Network;
+using System;
 
 namespace DS_Network.Sync.Centralized
 {
     public class CentralizedSyncAlgorithm
     {
         public AccessState State { get; set; }
-        public List<DataRequest> Queue { get; set; }
+        private List<DataRequest> _queue = new List<DataRequest>();
+        public List<DataRequest> Queue
+        {
+            get
+            {
+                return _queue;
+            }
+        }
         public NodeInfo LocalNodeInfo { get; private set; }
         public IConnectionProxy Proxy { get; private set; }
-        public long LocalId { get; private set; }
 
         public CentralizedSyncAlgorithmClient Client { get; private set; }
         public CentralizedSyncAlgorithmServer Server { get; private set; }
 
-        
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public CentralizedSyncAlgorithm(NodeInfo nodeInfo, IConnectionProxy proxy)
         {
             // State and Queue is only for Master Node
             State = AccessState.Released;
-            Queue = new List<DataRequest>();
-            
-            Client = new CentralizedSyncAlgorithmClient(this);
-            Server = new CentralizedSyncAlgorithmServer(this);
-
-            LocalId = nodeInfo.Id;
             Proxy = proxy;
             LocalNodeInfo = nodeInfo;
+
+            Client = new CentralizedSyncAlgorithmClient(this);
+            Server = new CentralizedSyncAlgorithmServer(this);
         }
 
+        /// <summary>
+        /// Add request into queue
+        /// </summary>
         public void AddRequest(DataRequest request)
         {
-            Queue.Add(request);
-            //Queue = Queue.OrderBy(x => x.Time).ToList();
-            //Queue = Queue.OrderBy(x => x.Time).ThenBy(x => x.CallerId).ToList();
+            _queue.Add(request);
+            LogHelper.WriteStatus("Master: Added " + request.CallerId + " into the queue.");
+            PrintQueue();
         }
-
+        /// <summary>
+        /// pop request
+        /// </summary>
         public DataRequest PopRequest()
         {
             DataRequest firstNode = null;
-            if (Queue.Count > 0)
+            if (_queue.Count > 0)
             {
-                firstNode = Queue[0];
-                Queue.Remove(firstNode);
-                //LogHelper.WriteStatus("Server: Remove request from queue: " + request.CallerId + " with timestamp: " +
-                //                          request.Time);
+                firstNode = _queue[0];
+                _queue.Remove(firstNode);
+                LogHelper.WriteStatus("Server: Remove request from queue: " + firstNode.CallerId);
             }
+            PrintQueue();
             return firstNode;
+        }
+
+        /// <summary>
+        /// list items in Queue
+        /// </summary>
+        public void PrintQueue()
+        {
+            string print = "-- Queue::";
+            //Console.Write("-- Queue:: ");
+            foreach (var q in _queue)
+            {
+                print += q.IpAndPort + ", ";
+                //Console.Write(q.IpAndPort);
+                //Console.Write(", ");
+            }
+            Console.WriteLine(print + "\n");
+            //Console.WriteLine("");
+        }
+
+        public void CentralizedReset()
+        {
+            State = AccessState.Released;
         }
     }
 }
