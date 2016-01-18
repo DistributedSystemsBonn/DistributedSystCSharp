@@ -191,34 +191,29 @@ namespace UnitTests.Mocks
 
         public event XmlRpcRequestEventHandler RequestEvent;
         public event XmlRpcResponseEventHandler ResponseEvent;
-        public bool @join(string ipAndPort)
+
+        public bool SignOff(string ipAndPort)
         {
             var host = _hostLookupWithUrls[_curUrl];
-            return host.Server.@join(ipAndPort);
+            return host.Server.SignOff(ipAndPort);
         }
 
-        public bool signOff(string ipAndPort)
+        public void GetStartMsg(bool isRicartAlgorithm)
         {
             var host = _hostLookupWithUrls[_curUrl];
-            return host.Server.signOff(ipAndPort);
+            host.Server.GetStartMsg(isRicartAlgorithm);
         }
 
-        public bool start()
+        public object[] GetHosts(string ipAndPortCallee)
         {
             var host = _hostLookupWithUrls[_curUrl];
-            return host.Server.start();
+            return host.Server.GetHosts(ipAndPortCallee);
         }
 
-        public object[] getHosts(string ipAndPortCallee)
+        public void AddNewHost(string ipAndPort)
         {
             var host = _hostLookupWithUrls[_curUrl];
-            return host.Server.getHosts(ipAndPortCallee);
-        }
-
-        public void addNewHost(string ipAndPort)
-        {
-            var host = _hostLookupWithUrls[_curUrl];
-            host.Server.addNewHost(ipAndPort);
+            host.Server.AddNewHost(ipAndPort);
         }
 
         public bool ReceiveElectionMsg(string id)
@@ -233,34 +228,47 @@ namespace UnitTests.Mocks
             host.Server.SetMasterNode(ipAndPort);
         }
 
-        public string readResource(string ipAndPort)
+        public string ReadResource(string ipAndPort)
         {
             var host = _hostLookupWithUrls[_curUrl];
-            return host.Server.readResource(ipAndPort);
+            return host.Server.ReadResource(ipAndPort);
         }
 
-        public void updateResource(string updateStr, string ipAndPort)
+        public void UpdateResource(string updateStr, string ipAndPort)
         {
             var host = _hostLookupWithUrls[_curUrl];
-            host.Server.updateResource(updateStr, ipAndPort);
+            host.Server.UpdateResource(updateStr, ipAndPort);
         }
 
-        public void GetSyncRequest(int timestamp, long id, string ipAndPort)
+        public void GetSyncRequest_CT(long id, string ipAndPort)
         {
             var host = _hostLookupWithUrls[_curUrl];
-            host.Server.GetSyncRequest(timestamp, id, ipAndPort);
+            host.Server.GetSyncRequest_CT(id, ipAndPort);
         }
 
-        public void GetAcceptResponse(string fromIpAndPort, int timestamp)
+        public void GetReleasedMsg_CT(long id, string fromIpAndPort)
         {
             var host = _hostLookupWithUrls[_curUrl];
-            host.Server.GetAcceptResponse(fromIpAndPort, timestamp);
+            host.Server.GetReleasedMsg_CT(id, fromIpAndPort);
         }
 
-        public void GetReleasedMsg(string fromIpAndPort)
+        public void GetAcceptResponse_CT()
         {
             var host = _hostLookupWithUrls[_curUrl];
-            host.Server.GetReleasedMsg(fromIpAndPort);
+            host.Server.GetAcceptResponse_CT();
         }
+
+        public void GetSyncRequest_RA(int timestamp, long id, string ipAndPort)
+        {
+            var host = _hostLookupWithUrls[_curUrl];
+            host.Server.GetSyncRequest_RA(timestamp, id, ipAndPort);
+        }
+
+        public void GetAcceptResponse_RA(string fromIpAndPort, int timestamp)
+        {
+            var host = _hostLookupWithUrls[_curUrl];
+            host.Server.GetAcceptResponse_RA(fromIpAndPort, timestamp);
+        }
+
     }
 }

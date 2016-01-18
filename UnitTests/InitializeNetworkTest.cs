@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using DS_Network.Election;
 using DS_Network.Helpers;
 using DS_Network.Network;
+using DS_Network.Sync.Centralized;
 using DS_Network.Sync.Ricart;
 using NUnit.Framework;
 using UnitTests.Mocks;
 
 namespace UnitTests
 {
-    [TestFixture]
-    //[SetUpFixture]
+    //[TestFixture]
+    [SetUpFixture]
     public abstract class InitializeNetworkTest
     {
-        public Host MasterHost;
-        public List<Host> Hosts = new List<Host>();
+        public static Host MasterHost;
+        public static List<Host> Hosts = new List<Host>();
         public int HostNumber = 4;
 
         private static bool initialized = false;
@@ -36,13 +37,14 @@ namespace UnitTests
                 //var proxy = XmlRpcProxyGen.Create<IConnectionProxy>();
                 
                 var port = NetworkHelper.FindFreePort();
-                var electAlg = new Bully();
                 var ipAddress = NetworkHelper.FindIp().ToString();
                 var nodeInfo = new NodeInfo(ipAddress, port);
-                var syncAlgorithm = new RicartSyncAlgorithm(nodeInfo, mockProxy);
+                var electAlg = new Bully(nodeInfo, mockProxy);
+                var ricartSyncAlgorithm = new RicartSyncAlgorithm(nodeInfo, mockProxy);
+                var centralizedSyncAlgorithm = new CentralizedSyncAlgorithm(nodeInfo, mockProxy);
 
-                var client = new Node(nodeInfo, mockProxy, electAlg, syncAlgorithm.Client, port); //client
-                var server = new Server(port, syncAlgorithm.Server, client);
+                var client = new Node(nodeInfo, mockProxy, electAlg, ricartSyncAlgorithm.Client, centralizedSyncAlgorithm.Client);
+                var server = new Server(port, client, ricartSyncAlgorithm.Server, centralizedSyncAlgorithm.Server);
                 var host = new Host(client, server);
                 hostLookup.Add(nodeInfo.GetFullUrl(), host);
 
@@ -51,13 +53,15 @@ namespace UnitTests
 
             //var proxy2 = XmlRpcProxyGen.Create<IConnectionProxy>();
             var port2 = NetworkHelper.FindFreePort();
-            var electAlg2 = new Bully();
             var ipAddress2 = "255.255.255.255";
             var nodeInfo2 = new NodeInfo(ipAddress2, port2);
-            var syncAlgorithm2 = new RicartSyncAlgorithm(nodeInfo2, mockProxy);
-            var masterclient = new Node(nodeInfo2, mockProxy, electAlg2, syncAlgorithm2.Client, port2);
+            var electAlg2 = new Bully(nodeInfo2, mockProxy);
+            var ricartSyncAlgorithm2 = new RicartSyncAlgorithm(nodeInfo2, mockProxy);
+            var centralizedSyncAlgorithm2 = new CentralizedSyncAlgorithm(nodeInfo2, mockProxy);
+
+            var masterclient = new Node(nodeInfo2, mockProxy, electAlg2, ricartSyncAlgorithm2.Client, centralizedSyncAlgorithm2.Client);
             MasterHost = new Host(masterclient,
-                new Server(port2, syncAlgorithm2.Server, masterclient));
+                new Server(port2, masterclient, ricartSyncAlgorithm2.Server, centralizedSyncAlgorithm2.Server));
             hostLookup.Add(nodeInfo2.GetFullUrl(), MasterHost);
         }
 

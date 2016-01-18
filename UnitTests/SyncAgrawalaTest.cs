@@ -18,8 +18,8 @@ namespace UnitTests
             var taskList = new List<Task>();
             foreach (var host in Hosts)
             {
-                var newSyncTask = Task.Factory.StartNew(() => host.Client.StartAlgorithm());
-                taskList.Add(newSyncTask);
+                //var newSyncTask = Task.Factory.StartNew(() => host.Client.StartAlgorithm());
+                //taskList.Add(newSyncTask);
                 //newSyncTask.Start();
             }
             Task.WaitAll(taskList.ToArray());
