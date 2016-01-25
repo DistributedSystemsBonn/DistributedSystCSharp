@@ -94,16 +94,7 @@ namespace DS_Network.Sync.Ricart
             
             PrintQueue();
         }
-        /// <summary>
-        /// pop a request from queue
-        /// </summary>
-        public void PopRequest(DataRequest request)
-        {
-            _queue.Remove(request);
-            LogHelper.WriteStatus("Server: Remove request from queue: " + request.CallerId + " with timestamp: " + request.Time);
-            PrintQueue();
-        }
-
+        
         public int GetQueueCount()
         {
             return _queue.Count;

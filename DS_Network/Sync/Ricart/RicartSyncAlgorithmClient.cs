@@ -29,10 +29,11 @@ namespace DS_Network.Sync.Ricart
             //wait until receive all messages.
             HasGotAllMessagesBack.Reset();
             _module.State = AccessState.Requested;
-
+            _module.IsInterested = true;
             LogHelper.WriteStatus("Client: [" + _module.LocalId + "] Current timestamp: " + _module.Clock.Value);
             LogHelper.WriteStatus("Client: [" + _module.LocalId + "] Capacity: " + toSendHosts.Count);
-            _module.IsInterested = true;
+
+            //Thread.Sleep(1000);
 
             foreach (var host in toSendHosts)
             {
