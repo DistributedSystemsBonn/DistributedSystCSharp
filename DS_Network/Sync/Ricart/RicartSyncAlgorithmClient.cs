@@ -68,7 +68,7 @@ namespace DS_Network.Sync.Ricart
             lock (Shared.SendLock)
             {
                 proxy1.Url = urlToSend;
-                proxy1.GetSyncRequest_RA(logicClockTs, _module.LocalNodeInfo.Id, _module.LocalNodeInfo.GetIpAndPort());
+                proxy1.GetSyncRequest_RA(logicClockTs.ToString(), _module.LocalNodeInfo.Id.ToString(), _module.LocalNodeInfo.GetIpAndPort());
             }
         }
 

@@ -264,10 +264,10 @@ namespace UnitTests.Mocks
             host.Server.GetSyncRequest_RA(timestamp, id, ipAndPort);
         }
 
-        public void GetAcceptResponse_RA(string fromIpAndPort, int timestamp)
+        public void GetAcceptResponseRA(string fromIpAndPort, int timestamp)
         {
             var host = _hostLookupWithUrls[_curUrl];
-            host.Server.GetAcceptResponse_RA(fromIpAndPort, timestamp);
+            host.Server.GetAcceptResponseRA(fromIpAndPort, timestamp);
         }
 
     }

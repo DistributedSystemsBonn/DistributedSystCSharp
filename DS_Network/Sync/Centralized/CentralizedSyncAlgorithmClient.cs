@@ -37,7 +37,7 @@ namespace DS_Network.Sync.Centralized
         private void SendSyncMsg(IConnectionProxy proxy, NodeInfo toNode) 
         {
             proxy.Url = toNode.GetFullUrl();
-            _module.Proxy.GetSyncRequest_CT(_module.LocalNodeInfo.Id, _module.LocalNodeInfo.GetIpAndPort());
+            _module.Proxy.GetSyncRequest_CT(_module.LocalNodeInfo.Id.ToString(), _module.LocalNodeInfo.GetIpAndPort());
         }
         
         /// <summary>
@@ -45,7 +45,7 @@ namespace DS_Network.Sync.Centralized
         /// </summary>
         public void Release_CT() 
         {
-            _module.Proxy.GetReleasedMsg_CT(_module.LocalNodeInfo.Id, _module.LocalNodeInfo.GetIpAndPort());
+            _module.Proxy.GetReleasedMsg_CT(_module.LocalNodeInfo.Id.ToString(), _module.LocalNodeInfo.GetIpAndPort());
         }
 
         public void CentralizedReset()

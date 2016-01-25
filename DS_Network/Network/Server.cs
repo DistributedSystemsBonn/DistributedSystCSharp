@@ -108,12 +108,12 @@ namespace DS_Network.Network
             proc.Start();
         }
 
-        public void GetSyncRequest_CT(long id, string ipAndPort)
+        public void GetSyncRequest_CT(string id, string ipAndPort)
         {
             _centralizedSyncAlgServer.GetSyncRequest_CT(id, ipAndPort);
         }
 
-        public void GetReleasedMsg_CT(long id, string fromIpAndPort)
+        public void GetReleasedMsg_CT(string id, string fromIpAndPort)
         {
             _centralizedSyncAlgServer.GetReleasedMsg_CT(id, fromIpAndPort);
         }
@@ -123,7 +123,7 @@ namespace DS_Network.Network
             _centralizedSyncAlgServer.GetAcceptResponse_CT();
         }
 
-        public void GetSyncRequest_RA(int timestamp, long id, string ipAndPort)
+        public void GetSyncRequest_RA(string timestamp, string id, string ipAndPort)
         {
             _ricartSyncAlgServer.GetSyncRequest_RA(timestamp, id, ipAndPort);
         }

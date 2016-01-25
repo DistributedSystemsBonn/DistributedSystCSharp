@@ -23,15 +23,15 @@ namespace DS_Network.Sync.Ricart
         /// <param name="timestamp"></param>
         /// <param name="id"></param>
         /// <param name="ipAndPort">Ip and port of host who calls this method</param>
-        public void GetSyncRequest_RA(int timestamp, long id, string ipAndPort)
+        public void GetSyncRequest_RA(string timestamp, string id, string ipAndPort)
         {
             LogHelper.WriteStatus("SERVER: RECV " + _module.LocalNodeInfo.GetIpAndPort() + " FROM: " + ipAndPort + " TIME: " + timestamp);
             // create request object
             var request = new DataRequest()
             {
-                Time = timestamp,
+                Time = int.Parse(timestamp),
                 Id = _module.LocalId,
-                CallerId = id,
+                CallerId = long.Parse(id),
                 IpAndPort = ipAndPort
             };
 
@@ -46,7 +46,7 @@ namespace DS_Network.Sync.Ricart
             }
             else if (_module.IsInterested)
             {
-                if (_module.Clock.CompareTime(timestamp, id))
+                if (_module.Clock.CompareTime(int.Parse(timestamp), long.Parse(id)))
                 {   // request timestamp is smaller than this node's timestamp.
                     //Send accept msg to callee
                     SendAcceptResponse(ipAndPort);
@@ -56,7 +56,7 @@ namespace DS_Network.Sync.Ricart
                     _module.AddRequest(request);
                 }
             }
-            _module.Clock.ReceiveEventHandle(timestamp);
+            _module.Clock.ReceiveEventHandle(int.Parse(timestamp));
         }
         /// <summary>
         /// send accept response to a host

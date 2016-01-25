@@ -9,10 +9,10 @@ namespace DS_Network.Sync
         /// HANDLE
         /// </summary>
         [XmlRpcMethod("Host.getSyncRequestCT")]
-        void GetSyncRequest_CT(long id, string ipAndPort);
+        void GetSyncRequest_CT(string id, string ipAndPort);
 
         [XmlRpcMethod("Host.getReleasedMsgCT")]
-        void GetReleasedMsg_CT(long id, string fromIpAndPort);
+        void GetReleasedMsg_CT(string id, string fromIpAndPort);
 
         [XmlRpcMethod("Host.getAcceptResponseCT")]
         void GetAcceptResponse_CT();

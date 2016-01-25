@@ -13,13 +13,13 @@ namespace DS_Network.Sync.Centralized
         /// <summary>
         /// Master: Get Sync Request msg from hosts
         /// </summary>
-        public void GetSyncRequest_CT(long id, string ipAndPort) 
+        public void GetSyncRequest_CT(string id, string ipAndPort) 
         {
             var request = new DataRequest()
             {
                 Time = 0,
                 Id = 0,
-                CallerId = id,
+                CallerId = long.Parse(id),
                 IpAndPort = ipAndPort
             };
 
@@ -59,7 +59,7 @@ namespace DS_Network.Sync.Centralized
         /// <summary>
         /// Master: Get released msg from a host
         /// </summary>
-        public void GetReleasedMsg_CT(long id, string fromIpAndPort)
+        public void GetReleasedMsg_CT(string id, string fromIpAndPort)
         {
             LogHelper.WriteStatus("Master: Released from " + fromIpAndPort);
             _module.State = AccessState.Released;
