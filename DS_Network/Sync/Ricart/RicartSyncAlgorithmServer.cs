@@ -74,7 +74,7 @@ namespace DS_Network.Sync.Ricart
             {
                 _module.Proxy.Url = NetworkHelper.FormXmlRpcUrl(ipAndPort);
                 //send accept response with parameter which describes our host
-                _module.Proxy.GetAcceptResponse_RA(_module.LocalNodeInfo.GetIpAndPort(), _module.Clock.Value);
+                _module.Proxy.GetAcceptResponse_RA(_module.LocalNodeInfo.GetIpAndPort(), _module.Clock.Value.ToString());
                 //var newSendThread =
                 //    new Thread(
                 //        () =>
@@ -87,7 +87,7 @@ namespace DS_Network.Sync.Ricart
         /// </summary>
         /// <param name="fromIpAndPort"></param>
         /// <param name="timestamp"></param>
-        public void GetAcceptResponse_RA(string fromIpAndPort, int timestamp)
+        public void GetAcceptResponse_RA(string fromIpAndPort, string timestamp)
         {
             var myIp = _module.LocalNodeInfo.GetIpAndPort();
             
@@ -103,7 +103,7 @@ namespace DS_Network.Sync.Ricart
             }
 
             //Clock: recv handle
-            _module.Clock.ReceiveEventHandle(timestamp);
+            _module.Clock.ReceiveEventHandle(int.Parse(timestamp));
         }
     }
 }
