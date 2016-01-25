@@ -32,8 +32,8 @@ namespace DS_Network.Sync.Ricart
             _module.IsInterested = true;
             LogHelper.WriteStatus("Client: [" + _module.LocalId + "] Current timestamp: " + _module.Clock.Value);
             LogHelper.WriteStatus("Client: [" + _module.LocalId + "] Capacity: " + toSendHosts.Count);
-
-            //Thread.Sleep(1000);
+            
+            //Thread.Sleep(5000);
 
             foreach (var host in toSendHosts)
             {

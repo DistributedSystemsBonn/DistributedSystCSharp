@@ -125,7 +125,8 @@ namespace DS_Network.Network
 
         public void GetSyncRequest_RA(string timestamp, string id, string ipAndPort)
         {
-            _ricartSyncAlgServer.GetSyncRequest_RA(timestamp, id, ipAndPort);
+            var t = new Thread(() => _ricartSyncAlgServer.GetSyncRequest_RA(timestamp, id, ipAndPort));
+            t.Start();
         }
 
         public void GetAcceptResponse_RA(string fromIpAndPort, string timestamp)
